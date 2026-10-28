@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <files-path name="downloads" path="downloads/" />
+    <cache-path name="notification_media" path="notification_media/" />
+    <cache-path name="avatar_capture" path="avatar_capture/" />
+</paths>

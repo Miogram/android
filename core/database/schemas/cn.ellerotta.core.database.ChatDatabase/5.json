@@ -1,0 +1,503 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 5,
+    "identityHash": "d13ddfc986b778a7fdd48546d45f0d01",
+    "entities": [
+      {
+        "tableName": "dialogs",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`dialog` TEXT NOT NULL, `folder` INTEGER NOT NULL, `position` INTEGER NOT NULL, `pinned` INTEGER NOT NULL, `topMessage` INTEGER NOT NULL, `unread` INTEGER NOT NULL, `mentions` INTEGER NOT NULL, `unreadMark` INTEGER NOT NULL, `muteUntil` INTEGER NOT NULL, `readOutbox` INTEGER NOT NULL, `message` BLOB, `draft` BLOB, `peers` TEXT NOT NULL, `written` INTEGER NOT NULL, `layer` INTEGER NOT NULL, PRIMARY KEY(`dialog`))",
+        "fields": [
+          {
+            "fieldPath": "dialog",
+            "columnName": "dialog",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "folder",
+            "columnName": "folder",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pinned",
+            "columnName": "pinned",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "topMessage",
+            "columnName": "topMessage",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unread",
+            "columnName": "unread",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mentions",
+            "columnName": "mentions",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unreadMark",
+            "columnName": "unreadMark",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "muteUntil",
+            "columnName": "muteUntil",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "readOutbox",
+            "columnName": "readOutbox",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "message",
+            "columnName": "message",
+            "affinity": "BLOB"
+          },
+          {
+            "fieldPath": "draft",
+            "columnName": "draft",
+            "affinity": "BLOB"
+          },
+          {
+            "fieldPath": "peers",
+            "columnName": "peers",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "written",
+            "columnName": "written",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "layer",
+            "columnName": "layer",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "dialog"
+          ]
+        }
+      },
+      {
+        "tableName": "messages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`dialog` TEXT NOT NULL, `topic` INTEGER NOT NULL, `id` INTEGER NOT NULL, `tl` BLOB NOT NULL, `peers` TEXT NOT NULL, `layer` INTEGER NOT NULL, `reactions` BLOB, PRIMARY KEY(`dialog`, `topic`, `id`))",
+        "fields": [
+          {
+            "fieldPath": "dialog",
+            "columnName": "dialog",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "topic",
+            "columnName": "topic",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tl",
+            "columnName": "tl",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "peers",
+            "columnName": "peers",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "layer",
+            "columnName": "layer",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reactions",
+            "columnName": "reactions",
+            "affinity": "BLOB"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "dialog",
+            "topic",
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_messages_id",
+            "unique": false,
+            "columnNames": [
+              "id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_messages_id` ON `${TABLE_NAME}` (`id`)"
+          }
+        ]
+      },
+      {
+        "tableName": "histories",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`dialog` TEXT NOT NULL, `topic` INTEGER NOT NULL, `complete` INTEGER NOT NULL, `stale` INTEGER NOT NULL, `used` INTEGER NOT NULL, PRIMARY KEY(`dialog`, `topic`))",
+        "fields": [
+          {
+            "fieldPath": "dialog",
+            "columnName": "dialog",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "topic",
+            "columnName": "topic",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "complete",
+            "columnName": "complete",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stale",
+            "columnName": "stale",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "used",
+            "columnName": "used",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "dialog",
+            "topic"
+          ]
+        }
+      },
+      {
+        "tableName": "peers",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`peer` TEXT NOT NULL, `name` TEXT NOT NULL, `min` INTEGER NOT NULL, `tl` BLOB NOT NULL, `seen` INTEGER NOT NULL, `layer` INTEGER NOT NULL, PRIMARY KEY(`peer`))",
+        "fields": [
+          {
+            "fieldPath": "peer",
+            "columnName": "peer",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "min",
+            "columnName": "min",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tl",
+            "columnName": "tl",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seen",
+            "columnName": "seen",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "layer",
+            "columnName": "layer",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "peer"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_peers_seen",
+            "unique": false,
+            "columnNames": [
+              "seen"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_peers_seen` ON `${TABLE_NAME}` (`seen`)"
+          }
+        ]
+      },
+      {
+        "tableName": "folders",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`position` INTEGER NOT NULL, `tl` BLOB NOT NULL, `layer` INTEGER NOT NULL, PRIMARY KEY(`position`))",
+        "fields": [
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tl",
+            "columnName": "tl",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "layer",
+            "columnName": "layer",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "position"
+          ]
+        }
+      },
+      {
+        "tableName": "meta",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`name` TEXT NOT NULL, `value` TEXT NOT NULL, PRIMARY KEY(`name`))",
+        "fields": [
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "value",
+            "columnName": "value",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "name"
+          ]
+        }
+      },
+      {
+        "tableName": "profiles",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`peer` TEXT NOT NULL, `full` BLOB, `post` BLOB, `subscribers` INTEGER, `gifts` BLOB, `photos` BLOB, `seen` INTEGER NOT NULL, `layer` INTEGER NOT NULL, PRIMARY KEY(`peer`))",
+        "fields": [
+          {
+            "fieldPath": "peer",
+            "columnName": "peer",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "full",
+            "columnName": "full",
+            "affinity": "BLOB"
+          },
+          {
+            "fieldPath": "post",
+            "columnName": "post",
+            "affinity": "BLOB"
+          },
+          {
+            "fieldPath": "subscribers",
+            "columnName": "subscribers",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "gifts",
+            "columnName": "gifts",
+            "affinity": "BLOB"
+          },
+          {
+            "fieldPath": "photos",
+            "columnName": "photos",
+            "affinity": "BLOB"
+          },
+          {
+            "fieldPath": "seen",
+            "columnName": "seen",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "layer",
+            "columnName": "layer",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "peer"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_profiles_seen",
+            "unique": false,
+            "columnNames": [
+              "seen"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_profiles_seen` ON `${TABLE_NAME}` (`seen`)"
+          }
+        ]
+      },
+      {
+        "tableName": "custom_emoji",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `tl` BLOB NOT NULL, `layer` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tl",
+            "columnName": "tl",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "layer",
+            "columnName": "layer",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "contacts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`peer` TEXT NOT NULL, `mutual` INTEGER NOT NULL, `layer` INTEGER NOT NULL, PRIMARY KEY(`peer`))",
+        "fields": [
+          {
+            "fieldPath": "peer",
+            "columnName": "peer",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mutual",
+            "columnName": "mutual",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "layer",
+            "columnName": "layer",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "peer"
+          ]
+        }
+      },
+      {
+        "tableName": "stories",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`peer` TEXT NOT NULL, `hidden` INTEGER NOT NULL, `maxRead` INTEGER NOT NULL, `tl` BLOB NOT NULL, `layer` INTEGER NOT NULL, PRIMARY KEY(`peer`))",
+        "fields": [
+          {
+            "fieldPath": "peer",
+            "columnName": "peer",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hidden",
+            "columnName": "hidden",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxRead",
+            "columnName": "maxRead",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tl",
+            "columnName": "tl",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "layer",
+            "columnName": "layer",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "peer"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd13ddfc986b778a7fdd48546d45f0d01')"
+    ]
+  }
+}

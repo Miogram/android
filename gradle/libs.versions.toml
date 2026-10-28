@@ -1,0 +1,87 @@
+[versions]
+agp = "9.4.1"
+kotlin = "2.4.20"
+composeBom = "2026.09.00"
+material3 = "1.5.0-alpha29"
+activity = "1.13.0"
+lifecycle = "2.11.0"
+coroutines = "1.11.0"
+concurrentFutures = "1.2.0"
+robolectric = "4.17"
+junit = "4.13.2"
+androidxTest = "1.7.0"
+androidxJunit = "1.3.0"
+ktproto = "0.2.0"
+ksp = "2.3.12"
+hilt = "2.60.1"
+hiltAndroidx = "1.4.0"
+navigation3 = "1.2.0"
+libphonenumber = "9.0.40"
+zxing = "3.5.4"
+biometric = "1.1.0"
+browser = "1.10.0"
+fragment = "1.8.9"
+media3 = "1.11.1"
+firebaseBom = "34.19.0"
+googleServices = "4.5.0"
+room = "2.8.5"
+work = "2.12.0"
+mapsCompose = "9.0.1"
+
+[libraries]
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+compose-ui = { module = "androidx.compose.ui:ui" }
+compose-ui-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
+compose-material-icons = { module = "androidx.compose.material:material-icons-core" }
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity" }
+lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
+work-runtime = { module = "androidx.work:work-runtime", version.ref = "work" }
+work-testing = { module = "androidx.work:work-testing", version.ref = "work" }
+coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+junit = { module = "junit:junit", version.ref = "junit" }
+concurrent-futures = { module = "androidx.concurrent:concurrent-futures", version.ref = "concurrentFutures" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTest" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTest" }
+androidx-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
+compose-foundation = { module = "androidx.compose.foundation:foundation" }
+libphonenumber = { module = "io.michaelrocks:libphonenumber-android", version.ref = "libphonenumber" }
+zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
+biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
+browser = { module = "androidx.browser:browser", version.ref = "browser" }
+fragment = { module = "androidx.fragment:fragment", version.ref = "fragment" }
+media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3" }
+media3-session = { module = "androidx.media3:media3-session", version.ref = "media3" }
+media3-ui-compose = { module = "androidx.media3:media3-ui-compose", version.ref = "media3" }
+hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
+navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
+navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
+lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycle" }
+hilt-lifecycle-viewmodel-compose = { module = "androidx.hilt:hilt-lifecycle-viewmodel-compose", version.ref = "hiltAndroidx" }
+ktproto-android = { module = "cn.ellerotta.ktproto:ktproto-android", version.ref = "ktproto" }
+ktproto-testing = { module = "cn.ellerotta.ktproto:ktproto-testing", version.ref = "ktproto" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
+maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }

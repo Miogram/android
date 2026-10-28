@@ -1,0 +1,19 @@
+Miogram
+Copyright 2026 Ioann Mel'nikov
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This product includes third-party material:
+
+- Material Symbols (Google), used as vector drawables in core/ui/src/main/res/drawable.
+  Apache License 2.0, https://github.com/google/material-design-icons
+
+- Google Sans Flex (The Google Sans Flex Authors), core/ui/src/main/res/font.
+  SIL Open Font License 1.1, see licenses/OFL-1.1-GoogleSansFlex.txt
+
+- Unicode emoji data derived from emoji-test.txt (Unicode, Inc.),
+  core/model/src/main/resources/cn/ellerotta/core/model/emoji*.txt.
+  Unicode License v3, see licenses/Unicode-3.0.txt
+
+- tlottie (git submodule core/lottie/src/main/rust/tlottie).
+  MIT License, see the LICENSE file in the submodule
