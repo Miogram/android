@@ -237,7 +237,7 @@ private fun FolderRow(
     val moveDown = stringResource(R.string.folders_move_down, title)
     Surface(
         shape = shape,
-        color = if (elevated) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainerLow,
+        color = if (elevated) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.surfaceContainer,
         shadowElevation = if (elevated) 6.dp else 0.dp,
         modifier = modifier
             .fillMaxWidth()
@@ -276,7 +276,7 @@ private fun FolderRow(
 private fun SuggestedRow(suggestion: SuggestedFolder, shape: Shape, enabled: Boolean, onAdd: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         shape = shape,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = MaterialTheme.colorScheme.surfaceContainer,
         modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 2.dp).testTag("suggested_${suggestion.folder.title}"),
     ) {
         Row(Modifier.heightIn(min = 64.dp).padding(start = 16.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -297,7 +297,7 @@ private fun SuggestedRow(suggestion: SuggestedFolder, shape: Shape, enabled: Boo
 @Composable
 internal fun FolderTile(folder: ChatFolder, modifier: Modifier = Modifier) {
     Box(
-        modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.secondaryContainer),
+        modifier.size(40.dp).clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.secondaryContainer),
         contentAlignment = Alignment.Center,
     ) {
         val emoticon = folder.emoticon
@@ -334,14 +334,14 @@ internal fun SectionLabel(text: String, count: String?, modifier: Modifier = Mod
 
 @Composable
 internal fun LimitCard(text: String, modifier: Modifier = Modifier) {
-    Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.tertiaryContainer, modifier = modifier.fillMaxWidth().testTag("folderLimit")) {
+    Surface(shape = MaterialTheme.shapes.largeIncreased, color = MaterialTheme.colorScheme.tertiaryContainer, modifier = modifier.fillMaxWidth().testTag("folderLimit")) {
         Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onTertiaryContainer, modifier = Modifier.padding(16.dp))
     }
 }
 
 internal fun sliceShape(index: Int, count: Int): Shape = when {
-    count == 1 -> RoundedCornerShape(24.dp)
-    index == 0 -> RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
-    index == count - 1 -> RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 24.dp, bottomEnd = 24.dp)
+    count == 1 -> RoundedCornerShape(20.dp)
+    index == 0 -> RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
+    index == count - 1 -> RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 20.dp, bottomEnd = 20.dp)
     else -> RoundedCornerShape(4.dp)
 }

@@ -21,6 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -326,7 +327,7 @@ internal fun ArticleEditorContent(
                     )
                 }
                 Spacer(Modifier.height(8.dp))
-                TextButton(onClick = { add(null) }, modifier = Modifier.testTag("articleAddEnd")) {
+                TextButton(onClick = { add(null) }, modifier = Modifier.testTag("articleAddEnd"), shapes = ButtonDefaults.shapes()) {
                     Icon(painterResource(R.drawable.ic_add), null)
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(R.string.chat_article_add))
@@ -441,7 +442,7 @@ private fun EditorNotes(counts: ArticleCounts, gate: ArticleGate, over: Set<Arti
         )
     }
     if (premiumNeeded) {
-        Surface(color = MaterialTheme.colorScheme.secondaryContainer, shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp).testTag("articlePremium")) {
+        Surface(color = MaterialTheme.colorScheme.secondaryContainer, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp).testTag("articlePremium")) {
             Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Icon(painterResource(R.drawable.ic_star), null, tint = MaterialTheme.colorScheme.primary)
                 Spacer(Modifier.width(8.dp))
@@ -488,7 +489,7 @@ private fun EditorRow(
                 val label = row.block?.let { articlePreview(ArticleMessage(listOf(it))) }.orEmpty()
                 Surface(
                     color = colors.surfaceContainerHigh,
-                    shape = RoundedCornerShape(8.dp),
+                    shape = MaterialTheme.shapes.small,
                     modifier = Modifier.weight(1f).focusRequester(requester).onFocusChanged { if (it.isFocused) onFocus() }.clickable { onFocus() },
                 ) {
                     Text(label, style = body, modifier = Modifier.padding(12.dp))
@@ -513,8 +514,8 @@ private fun EditorRow(
                 }
                 val quote = row.kind == ArticleRowKind.Quote
                 val background = when (row.kind) {
-                    ArticleRowKind.Code, ArticleRowKind.Math -> Modifier.background(colors.surfaceContainerHigh, RoundedCornerShape(6.dp)).padding(6.dp)
-                    ArticleRowKind.Quote -> Modifier.background(colors.primary.copy(alpha = 0.08f), RoundedCornerShape(6.dp)).padding(6.dp)
+                    ArticleRowKind.Code, ArticleRowKind.Math -> Modifier.background(colors.surfaceContainerHigh, MaterialTheme.shapes.small).padding(6.dp)
+                    ArticleRowKind.Quote -> Modifier.background(colors.primary.copy(alpha = 0.08f), MaterialTheme.shapes.small).padding(6.dp)
                     else -> Modifier.padding(vertical = 4.dp)
                 }
                 val transformation = if (row.kind in PLAIN) null else EntitiesTransformation(row.text.entities, composerColors())
@@ -562,7 +563,7 @@ private fun RowMarker(row: ArticleRow, number: Int, onCheck: () -> Unit) {
             tint = colors.primary,
             modifier = Modifier.clickable(role = Role.Checkbox, onClick = onCheck).minimumInteractiveComponentSize().size(24.dp).testTag("articleCheck_${row.id}"),
         )
-        ArticleRowKind.Quote -> Box(Modifier.width(3.dp).height(24.dp).background(colors.primary, RoundedCornerShape(2.dp)))
+        ArticleRowKind.Quote -> Box(Modifier.width(3.dp).height(24.dp).background(colors.primary, MaterialTheme.shapes.extraSmall))
         ArticleRowKind.Code -> Icon(painterResource(R.drawable.ic_code), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
         ArticleRowKind.Math -> Text("\u2211", style = marker)
         ArticleRowKind.Table -> Icon(painterResource(R.drawable.ic_table), null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
@@ -584,7 +585,7 @@ private fun RowBar(
         Row(Modifier.padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             var menu by remember { mutableStateOf(false) }
             Box {
-                TextButton(onClick = { menu = true }, enabled = kind !in FIXED, modifier = Modifier.testTag("articleKind")) {
+                TextButton(onClick = { menu = true }, enabled = kind !in FIXED, modifier = Modifier.testTag("articleKind"), shapes = ButtonDefaults.shapes()) {
                     Text(stringResource(kindLabel(kind)))
                 }
                 DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {

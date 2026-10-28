@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -102,6 +103,7 @@ fun ContactShareScreen(
             text = { Text(phoneText(person.phone.orEmpty())) },
             confirmButton = {
                 TextButton(
+                    shapes = ButtonDefaults.shapes(),
                     onClick = {
                         asked = null
                         onSend(person)
@@ -109,7 +111,7 @@ fun ContactShareScreen(
                     modifier = Modifier.testTag("contactShareSend"),
                 ) { Text(stringResource(R.string.contact_share_send)) }
             },
-            dismissButton = { TextButton(onClick = { asked = null }) { Text(stringResource(R.string.common_cancel)) } },
+            dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = { asked = null }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
 }

@@ -54,7 +54,7 @@ internal fun ProfileCard(modifier: Modifier = Modifier, content: @Composable Col
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .clip(ProfileCardShape)
-            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .profileCardOutline(),
         content = content,
     )
@@ -88,7 +88,7 @@ internal fun ProfileField(
 }
 
 @Composable
-internal fun ProfileFieldDivider() = HorizontalDivider(Modifier.padding(horizontal = 20.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
+internal fun ProfileFieldDivider() = HorizontalDivider(Modifier.padding(horizontal = 20.dp), color = MaterialTheme.colorScheme.outlineVariant)
 
 @Composable
 internal fun ProfileSectionLabel(start: String, end: String?, modifier: Modifier = Modifier) {

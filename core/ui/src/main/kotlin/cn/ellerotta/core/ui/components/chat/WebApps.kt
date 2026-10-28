@@ -685,11 +685,11 @@ fun WebAppScreen(
                 onDismissRequest = { confirmingClose = false },
                 text = { Text(stringResource(R.string.web_app_close_text)) },
                 confirmButton = {
-                    TextButton(onClick = { confirmingClose = false; onClose() }, modifier = Modifier.testTag("webAppCloseAnyway")) {
+                    TextButton(shapes = ButtonDefaults.shapes(), onClick = { confirmingClose = false; onClose() }, modifier = Modifier.testTag("webAppCloseAnyway")) {
                         Text(stringResource(R.string.web_app_close_anyway), color = colors.error)
                     }
                 },
-                dismissButton = { TextButton(onClick = { confirmingClose = false }) { Text(stringResource(R.string.common_cancel)) } },
+                dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = { confirmingClose = false }) { Text(stringResource(R.string.common_cancel)) } },
                 modifier = Modifier.testTag("webAppConfirmClose"),
             )
         }
@@ -714,11 +714,11 @@ private fun WebAppQuestionDialog(name: String, question: WebAppQuestion, onAnswe
             }
         },
         confirmButton = {
-            TextButton(onClick = { onAnswer(true) }, modifier = Modifier.testTag("webAppAllow")) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = { onAnswer(true) }, modifier = Modifier.testTag("webAppAllow")) {
                 Text(stringResource(if (question.ask == WebAppAsk.Phone) R.string.web_app_share_phone else R.string.web_app_allow))
             }
         },
-        dismissButton = { TextButton(onClick = { onAnswer(false) }, modifier = Modifier.testTag("webAppDeny")) { Text(stringResource(R.string.web_app_deny)) } },
+        dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = { onAnswer(false) }, modifier = Modifier.testTag("webAppDeny")) { Text(stringResource(R.string.web_app_deny)) } },
         modifier = Modifier.testTag("webAppQuestion"),
     )
 }
@@ -738,11 +738,11 @@ fun WebAppConsentDialog(consent: WebAppConsent, onAnswer: (writeAllowed: Boolean
             }
         },
         confirmButton = {
-            TextButton(onClick = { onAnswer(consent.writeAllowed(write)) }, enabled = !consent.terms || terms, modifier = Modifier.testTag("webAppConsentOk")) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = { onAnswer(consent.writeAllowed(write)) }, enabled = !consent.terms || terms, modifier = Modifier.testTag("webAppConsentOk")) {
                 Text(stringResource(if (consent.add) R.string.web_app_consent_add_button else R.string.web_app_consent_open_button))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+        dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
         modifier = Modifier.testTag("webAppConsent"),
     )
 }
@@ -758,7 +758,7 @@ private fun WebAppPopupDialog(popup: WebAppPopup, onClose: (String?) -> Unit) {
             val buttons = @Composable {
                 popup.buttons.forEach { button ->
                     val text = button.text ?: stringResource(if (button.type == "cancel") R.string.common_cancel else if (button.type == "close") R.string.web_app_close else R.string.common_ok)
-                    TextButton(onClick = { onClose(button.id) }, modifier = Modifier.testTag("webAppPopup_${button.id}")) {
+                    TextButton(shapes = ButtonDefaults.shapes(), onClick = { onClose(button.id) }, modifier = Modifier.testTag("webAppPopup_${button.id}")) {
                         Text(text, color = if (button.type == "destructive") MaterialTheme.colorScheme.error else Color.Unspecified)
                     }
                 }

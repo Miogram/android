@@ -64,7 +64,7 @@ internal fun PlaceBlock(place: GeoPlace, messageId: Int, accent: Color, now: Lon
             label = stringResource(R.string.chat_place_open),
             tag = "place_$messageId",
             leading = {
-                Surface(shape = MaterialTheme.shapes.medium, color = accent, contentColor = MaterialTheme.colorScheme.surface) {
+                Surface(shape = MaterialTheme.shapes.large, color = accent, contentColor = MaterialTheme.colorScheme.surface) {
                     Icon(painterResource(if (live != null) R.drawable.ic_share_location else R.drawable.ic_location_on), null, Modifier.padding(8.dp).size(24.dp))
                 }
             },
@@ -78,14 +78,14 @@ internal fun PlaceBlock(place: GeoPlace, messageId: Int, accent: Color, now: Lon
         Column(
             Modifier
                 .width(width)
-                .clip(MaterialTheme.shapes.medium)
+                .clip(MaterialTheme.shapes.large)
                 .clickable(enabled = enabled, onClickLabel = stringResource(R.string.chat_place_open), role = Role.Button, onClick = open)
                 .testTag("place_$messageId"),
         ) {
             GeoMapView(
                 place,
                 zoom = GeoMaps.zoomOf(place),
-                modifier = Modifier.fillMaxWidth().height(width * PLACE_MAP_RATIO).clip(MaterialTheme.shapes.medium).testTag("placeMap_$messageId"),
+                modifier = Modifier.fillMaxWidth().height(width * PLACE_MAP_RATIO).clip(MaterialTheme.shapes.large).testTag("placeMap_$messageId"),
             ) {
                 if (live != null && !over) {
                     val name = live.senderName.orEmpty()
@@ -128,7 +128,7 @@ internal fun ContactBlock(card: ContactCard, messageId: Int, enabled: Boolean) {
 @Composable
 private fun AttachCard(onClick: () -> Unit, enabled: Boolean, label: String, tag: String, leading: @Composable () -> Unit, title: String, subtitle: String) {
     Surface(
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f),
         modifier = Modifier.widthIn(min = 200.dp).heightIn(min = 56.dp).padding(vertical = 4.dp).testTag(tag),
     ) {

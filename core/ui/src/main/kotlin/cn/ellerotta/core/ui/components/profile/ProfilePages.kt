@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -109,7 +110,7 @@ internal fun ProfilePages(
             tabTag = { "profileTab_${tabs.getOrNull(it)?.key}" },
             modifier = Modifier.background(MaterialTheme.colorScheme.surface).semantics { contentDescription = tabsLabel }.testTag("profileTabs"),
         ) { index, label ->
-            tabs.getOrNull(index)?.let { Text(it.label(), style = label.style, fontWeight = label.weight, color = label.color, maxLines = 1) }
+            tabs.getOrNull(index)?.let { Text(it.label(), style = label.style, color = label.color, maxLines = 1) }
         }
         HorizontalPager(
             state = pagerState,
@@ -147,7 +148,7 @@ internal fun GiftsPage(
                 if (page.nextOffset != null) {
                     item(key = "more") {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                            TextButton(onClick = callbacks.onMore, modifier = Modifier.testTag("giftsMore")) { Text(stringResource(R.string.profile_gifts_more)) }
+                            TextButton(onClick = callbacks.onMore, shapes = ButtonDefaults.shapes(), modifier = Modifier.testTag("giftsMore")) { Text(stringResource(R.string.profile_gifts_more)) }
                         }
                     }
                 }
@@ -192,6 +193,6 @@ private fun GiftCollectionRow(gifts: ProfileGifts, stickers: Map<String, ByteArr
     ) { index, style ->
         val collection = collections.getOrNull(index - 1)
         collection?.icon?.let { GiftSticker(it, stickers, onLoadSticker, 20.dp) }
-        Text(collection?.title ?: stringResource(R.string.profile_gifts_all), style = style.style, fontWeight = style.weight, color = style.color, maxLines = 1)
+        Text(collection?.title ?: stringResource(R.string.profile_gifts_all), style = style.style, color = style.color, maxLines = 1)
     }
 }

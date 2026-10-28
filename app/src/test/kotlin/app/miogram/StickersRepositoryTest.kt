@@ -59,14 +59,14 @@ class StickersRepositoryTest {
                 assertNull(detail.stickers[1].stickerPreview())
 
                 val sticker = detail.stickers.first()
-                repos.messages.sendDocument("self", sticker.key)
+                repos.messages.sendDocument("self", sticker)
                 val sent = assertIs<InputDocument>(assertIs<InputMediaDocument>(assertNotNull(fake.lastSendMedia).media).id)
                 assertEquals(FakeTelegram.CAT_ID to FakeTelegram.CAT_ID + 1, sent.id to sent.accessHash)
                 assertContentEquals(byteArrayOf(7), sent.fileReference)
                 assertEquals(sticker.key, repos.messages.history("self").last().media?.key)
 
                 fake.expireStickerReference()
-                repos.messages.sendDocument("self", sticker.key)
+                repos.messages.sendDocument("self", sticker)
                 val resent = assertIs<InputDocument>(assertIs<InputMediaDocument>(assertNotNull(fake.lastSendMedia).media).id)
                 assertContentEquals(fake.stickerReference, resent.fileReference)
                 assertContentEquals(fake.stickerBytes, repos.media.sticker("doc${FakeTelegram.CAT_TWO_ID}"))
@@ -163,14 +163,15 @@ class StickersRepositoryTest {
                 assertTrue(calls.all { it.peer == InputPeerEmpty })
 
                 val found = first.gifs.single()
-                repos.messages.sendDocument("self", found.key)
+                repos.messages.sendDocument("self", found)
                 val sent = assertIs<InputDocument>(assertIs<InputMediaDocument>(assertNotNull(fake.lastSendMedia).media).id)
                 assertEquals(FakeTelegram.FOUND_GIF_ID, sent.id)
                 repos.stickers.saveGif(found.key)
-                assertEquals(listOf("doc${FakeTelegram.FOUND_GIF_ID}", "doc${FakeTelegram.SAVED_GIF_ID}"), repos.stickers.savedGifs().map { it.key })
+                val gifs = repos.stickers.savedGifs()
+                assertEquals(listOf("doc${FakeTelegram.FOUND_GIF_ID}", "doc${FakeTelegram.SAVED_GIF_ID}"), gifs.map { it.key })
 
                 fake.expireStickerReference()
-                repos.messages.sendDocument("self", "doc${FakeTelegram.SAVED_GIF_ID}")
+                repos.messages.sendDocument("self", gifs.single { it.key == "doc${FakeTelegram.SAVED_GIF_ID}" })
                 assertContentEquals(fake.stickerReference, assertIs<InputDocument>(assertIs<InputMediaDocument>(assertNotNull(fake.lastSendMedia).media).id).fileReference)
 
                 assertEquals(listOf("doc${FakeTelegram.CAT_ID}", "doc${FakeTelegram.CAT_TWO_ID}"), repos.stickers.searchStickers(" cat ", listOf("en", "en")).map { it.key })

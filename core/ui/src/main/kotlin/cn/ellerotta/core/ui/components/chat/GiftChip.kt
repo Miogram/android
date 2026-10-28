@@ -26,7 +26,7 @@ internal fun GiftChip(message: MessageItem, stickers: Map<String, ByteArray>, mo
     val gift = message.gift ?: return
     Box(modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
         Surface(
-            shape = RoundedCornerShape(28.dp),
+            shape = MaterialTheme.shapes.extraLarge,
             color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = GIFT_CHIP_ALPHA),
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
             modifier = Modifier.widthIn(max = 240.dp).testTag("giftChip_${message.id}"),

@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -205,14 +204,14 @@ private fun ContextActions(
     val icons = actions.filter { it in ICON_ACTIONS }
     val lines = actions.filterNot { it in ICON_ACTIONS }
     Surface(
-        shape = RoundedCornerShape(20.dp),
+        shape = MaterialTheme.shapes.largeIncreased,
         color = MaterialTheme.colorScheme.surfaceContainerHighest,
         contentColor = MaterialTheme.colorScheme.onSurface,
         modifier = modifier.widthIn(min = MENU_MIN_WIDTH, max = MENU_MAX_WIDTH).width(IntrinsicSize.Max),
     ) {
         Column(Modifier.padding(10.dp)) {
             if (message != null && onShowReactors != null) {
-                Box(Modifier.clip(RoundedCornerShape(12.dp))) { ReactorsLine(message, avatars, onShowReactors) }
+                Box(Modifier.clip(MaterialTheme.shapes.medium)) { ReactorsLine(message, avatars, onShowReactors) }
             }
             if (icons.isNotEmpty()) {
                 Row(Modifier.fillMaxWidth().heightIn(min = ACTION_HEIGHT), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
@@ -229,7 +228,7 @@ private fun ContextActions(
                     Modifier
                         .fillMaxWidth()
                         .heightIn(min = ACTION_HEIGHT)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(MaterialTheme.shapes.medium)
                         .clickable { onAction(action) }
                         .semantics { role = Role.Button }
                         .padding(horizontal = 12.dp, vertical = 8.dp)

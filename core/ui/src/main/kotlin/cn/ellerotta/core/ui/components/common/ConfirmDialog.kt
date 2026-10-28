@@ -1,6 +1,7 @@
 package cn.ellerotta.core.ui.components.common
 
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -17,10 +18,10 @@ fun ConfirmDialog(title: String, text: String?, confirm: String, tag: String, on
         title = { Text(title) },
         text = text?.let { { Text(it) } },
         confirmButton = {
-            TextButton(onClick = onConfirm, modifier = Modifier.testTag(tag)) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = onConfirm, modifier = Modifier.testTag(tag)) {
                 Text(confirm, color = MaterialTheme.colorScheme.error)
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+        dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }

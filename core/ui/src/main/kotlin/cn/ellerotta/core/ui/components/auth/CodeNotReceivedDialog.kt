@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -66,12 +67,12 @@ fun CodeNotReceivedDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onBackToCodeEntry, modifier = Modifier.testTag("codeNotReceivedBack")) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = onBackToCodeEntry, modifier = Modifier.testTag("codeNotReceivedBack")) {
                 Text(stringResource(R.string.code_not_found_back))
             }
         },
         dismissButton = {
-            TextButton(onClick = onChangeNumber, modifier = Modifier.testTag("changeNumber")) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = onChangeNumber, modifier = Modifier.testTag("changeNumber")) {
                 Text(stringResource(R.string.code_not_found_change))
             }
         },

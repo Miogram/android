@@ -52,7 +52,7 @@ internal fun CountryList(countries: List<Country>, onPick: (Country) -> Unit) {
             placeholder = { Text(stringResource(R.string.phone_search)) },
             leadingIcon = { Icon(painterResource(R.drawable.ic_search), null) },
             singleLine = true,
-            shape = MaterialTheme.shapes.extraLarge,
+            shape = MaterialTheme.shapes.extraLargeIncreased,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("countrySearch"),
         )

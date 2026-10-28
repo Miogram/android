@@ -1,6 +1,7 @@
 package cn.ellerotta.core.ui
 
 import android.graphics.Bitmap
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.currentComposer
@@ -16,6 +17,7 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.Density
+import cn.ellerotta.core.ui.components.common.LocalPreviewScheme
 import java.io.File
 import kotlin.test.assertEquals
 import org.junit.Assume.assumeNotNull
@@ -47,15 +49,17 @@ class ScreenshotsTest {
         val dir = System.getenv("MIOGRAM_SCREENSHOTS")
         assumeNotNull(dir)
         val only = System.getenv("MIOGRAM_SCREENSHOT_FILTER")?.let(::Regex)
+        val schemes = System.getenv("MIOGRAM_SCREENSHOT_SCHEMES")?.split(',')?.map { name -> "-$name" to schemeNamed(name) } ?: listOf("" to null)
         File(dir).mkdirs()
         var current by mutableStateOf<Pair<String, ComposableMethod>?>(null)
+        var scheme by mutableStateOf<((Boolean) -> ColorScheme)?>(null)
         var shown: String? = null
         compose.mainClock.autoAdvance = false
         compose.setContent {
             val density = LocalDensity.current
-            CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale)) {
+            CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale), LocalPreviewScheme provides scheme) {
                 current?.let { (name, method) ->
-                    key(name) {
+                    key(name, scheme) {
                         method.invoke(currentComposer, null)
                         SideEffect { shown = name }
                     }
@@ -63,19 +67,26 @@ class ScreenshotsTest {
             }
         }
         val previews = mioPreviews().filter { only == null || only.containsMatchIn(it.first) }
-        for (preview in previews) {
+        for ((suffix, colours) in schemes) for (preview in previews) {
             try {
                 current = preview
+                scheme = colours
                 Snapshot.sendApplyNotifications()
                 compose.mainClock.advanceTimeBy(1500)
                 compose.waitForIdle()
                 assertEquals(preview.first, shown)
                 val image = compose.onRoot().captureToImage().asAndroidBitmap()
-                File(dir, "${preview.first}_$mode.png").outputStream().use { image.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                File(dir, "${preview.first}_$mode$suffix.png").outputStream().use { image.compress(Bitmap.CompressFormat.PNG, 100, it) }
             } catch (e: Throwable) {
                 if (e.javaClass.simpleName != "AppNotIdleException") throw AssertionError("${preview.first} failed", e)
                 System.err.println("${preview.first} skipped: never idle")
             }
         }
+    }
+
+    private fun schemeNamed(name: String): ((Boolean) -> ColorScheme)? = when (name) {
+        "brand" -> null
+        "monochrome" -> { dark: Boolean -> monochromeScheme(dark) }
+        else -> wallpaperSeeds.toMap().getValue(name).let { seed -> { dark: Boolean -> wallpaperScheme(seed, dark) } }
     }
 }

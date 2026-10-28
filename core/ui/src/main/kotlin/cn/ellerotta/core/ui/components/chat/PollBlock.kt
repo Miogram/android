@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
@@ -183,17 +184,17 @@ internal fun PollBlock(
             )
         }
         if (canVote && poll.multipleChoice) {
-            TextButton(onClick = { onVote?.invoke(checked) }, enabled = checked.isNotEmpty(), modifier = Modifier.align(Alignment.CenterHorizontally).testTag("pollVote_${message.id}")) {
+            TextButton(onClick = { onVote?.invoke(checked) }, enabled = checked.isNotEmpty(), modifier = Modifier.align(Alignment.CenterHorizontally).testTag("pollVote_${message.id}"), shapes = ButtonDefaults.shapes()) {
                 Text(stringResource(R.string.chat_poll_vote), color = accent)
             }
         }
         if (onVote != null && poll.canRetract(now)) {
-            TextButton(onClick = { onVote(emptyList()) }, modifier = Modifier.align(Alignment.CenterHorizontally).testTag("pollRetract_${message.id}")) {
+            TextButton(onClick = { onVote(emptyList()) }, modifier = Modifier.align(Alignment.CenterHorizontally).testTag("pollRetract_${message.id}"), shapes = ButtonDefaults.shapes()) {
                 Text(stringResource(R.string.chat_poll_retract), color = accent)
             }
         }
         if (onShowVotes != null && poll.publicVoters && results && poll.results.totalVoters > 0) {
-            TextButton(onClick = onShowVotes, modifier = Modifier.align(Alignment.CenterHorizontally).testTag("pollVotes_${message.id}")) {
+            TextButton(onClick = onShowVotes, modifier = Modifier.align(Alignment.CenterHorizontally).testTag("pollVotes_${message.id}"), shapes = ButtonDefaults.shapes()) {
                 Text(stringResource(R.string.chat_poll_view_votes), color = accent)
             }
         }

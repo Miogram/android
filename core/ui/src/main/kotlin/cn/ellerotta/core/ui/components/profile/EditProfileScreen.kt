@@ -149,12 +149,12 @@ fun EditProfileScreen(
             title = { Text(stringResource(R.string.profile_edit_discard_title)) },
             text = { Text(stringResource(R.string.profile_edit_discard_text)) },
             confirmButton = {
-                TextButton(onClick = {
+                TextButton(shapes = ButtonDefaults.shapes(), onClick = {
                     discarding = false
                     onBack()
                 }, modifier = Modifier.testTag("confirmDiscard")) { Text(stringResource(R.string.profile_edit_discard), color = MaterialTheme.colorScheme.error) }
             },
-            dismissButton = { TextButton(onClick = { discarding = false }) { Text(stringResource(R.string.profile_edit_keep)) } },
+            dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = { discarding = false }) { Text(stringResource(R.string.profile_edit_keep)) } },
         )
     }
 }
@@ -374,6 +374,7 @@ private fun BirthdayDialog(birthday: Birthday?, onPick: (Birthday) -> Unit, onDi
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(
+                shapes = ButtonDefaults.shapes(),
                 onClick = {
                     val picked = state.selectedDateMillis?.let { Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate() } ?: return@TextButton
                     onPick(Birthday(picked.dayOfMonth, picked.monthValue, picked.year.takeIf { withYear }))
@@ -382,7 +383,7 @@ private fun BirthdayDialog(birthday: Birthday?, onPick: (Birthday) -> Unit, onDi
                 modifier = Modifier.testTag("birthdaySet"),
             ) { Text(stringResource(R.string.profile_edit_birthday_set)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+        dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     ) {
         Column(Modifier.verticalScroll(rememberScrollState())) {
             DatePicker(state, title = null, headline = null)
@@ -461,13 +462,13 @@ private fun ChannelRow(channel: PersonalChannel?, avatars: Map<String, ByteArray
             },
             confirmButton = {
                 if (channel != null) {
-                    TextButton(onClick = {
+                    TextButton(shapes = ButtonDefaults.shapes(), onClick = {
                         picking = false
                         actions.onChannel(null)
                     }, modifier = Modifier.testTag("channelRemove")) { Text(stringResource(R.string.profile_edit_channel_remove)) }
                 }
             },
-            dismissButton = { TextButton(onClick = { picking = false }) { Text(stringResource(R.string.common_cancel)) } },
+            dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = { picking = false }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
 }

@@ -23,6 +23,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -250,11 +251,11 @@ internal fun CreateTopicDialog(onDismiss: () -> Unit, onCreate: (String, Int) ->
             }
         },
         confirmButton = {
-            TextButton(onClick = { onCreate(name.trim(), color) }, enabled = name.isNotBlank(), modifier = Modifier.testTag("confirmCreateTopic")) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = { onCreate(name.trim(), color) }, enabled = name.isNotBlank(), modifier = Modifier.testTag("confirmCreateTopic")) {
                 Text(stringResource(R.string.topics_create_button))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+        dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }
 

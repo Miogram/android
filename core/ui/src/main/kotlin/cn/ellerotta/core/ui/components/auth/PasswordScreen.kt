@@ -97,7 +97,7 @@ fun PasswordScreen(hint: String?, busy: Boolean, wrongCount: Int, onBack: () -> 
             },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
             onKeyboardAction = { submit() },
-            shape = MaterialTheme.shapes.medium,
+            shape = MaterialTheme.shapes.large,
             modifier = Modifier
                 .fillMaxWidth()
                 .shake(wrongCount)

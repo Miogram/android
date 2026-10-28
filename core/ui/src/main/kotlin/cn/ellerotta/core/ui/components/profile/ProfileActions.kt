@@ -237,7 +237,7 @@ private fun ActionSquare(@DrawableRes icon: Int, label: String, modifier: Modifi
 internal val ProfileCardShape = RoundedCornerShape(28.dp)
 
 @Composable
-internal fun Modifier.profileCardOutline(): Modifier = border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f), ProfileCardShape)
+internal fun Modifier.profileCardOutline(): Modifier = border(1.dp, MaterialTheme.colorScheme.outlineVariant, ProfileCardShape)
 
 @Composable
 internal fun ProfileMusicCard(
@@ -252,7 +252,7 @@ internal fun ProfileMusicCard(
 ) {
     val image = remember(cover) { cover?.let { BitmapFactory.decodeByteArray(it, 0, it.size) } }
     val tone = remember(image) { image?.let(::coverTone) }
-    val base = tone ?: MaterialTheme.colorScheme.surfaceContainerLow
+    val base = tone ?: MaterialTheme.colorScheme.surfaceContainer
     val deep = tone?.let { darken(it, 0.62f) } ?: MaterialTheme.colorScheme.surfaceContainerHighest
     val text = if (tone != null) Color.White else MaterialTheme.colorScheme.onSurface
     val secondary = if (tone != null) musicCardSecondary(tone) else MaterialTheme.colorScheme.onSurfaceVariant
@@ -285,7 +285,7 @@ internal fun ProfileMusicCard(
             }
         }
         Row(Modifier.fillMaxSize().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(64.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surfaceContainerHighest), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(64.dp).clip(MaterialTheme.shapes.large).background(MaterialTheme.colorScheme.surfaceContainerHighest), contentAlignment = Alignment.Center) {
                 if (image != null) {
                     Image(image.asImageBitmap(), null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
                 } else {

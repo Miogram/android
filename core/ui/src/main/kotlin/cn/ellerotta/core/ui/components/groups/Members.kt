@@ -106,7 +106,7 @@ fun MembersScreen(
                     placeholder = { Text(stringResource(R.string.members_search)) },
                     leadingIcon = { Icon(painterResource(R.drawable.ic_search), null) },
                     singleLine = true,
-                    shape = MaterialTheme.shapes.extraLarge,
+                    shape = MaterialTheme.shapes.extraLargeIncreased,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).testTag("memberSearch"),
                 )

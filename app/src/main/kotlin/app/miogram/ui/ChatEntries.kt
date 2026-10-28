@@ -119,6 +119,7 @@ internal fun EntryProviderScope<Route>.chatEntries(navigator: Navigator, back: (
         val search by model.search.collectAsStateWithLifecycle()
         val searchActions = remember(model) { ChatSearchActions(onQuery = model::search, onMore = model::searchMore, onClose = model::closeSearch) }
         val inline by model.inline.collectAsStateWithLifecycle()
+        val mentions by model.mentions.collectAsStateWithLifecycle()
         val inlineActions = remember(model) {
             ChatInlineActions(
                 onText = model::inlineText,
@@ -127,6 +128,7 @@ internal fun EntryProviderScope<Route>.chatEntries(navigator: Navigator, back: (
                 onSwitchPm = model::switchToBot,
                 onLoad = model::loadSticker,
                 onSwitchWebView = model::openInlineApp,
+                onMention = model::mentionTyped,
             )
         }
         val callbackAnswer by model.callbackAnswer.collectAsStateWithLifecycle()
@@ -395,6 +397,7 @@ internal fun EntryProviderScope<Route>.chatEntries(navigator: Navigator, back: (
                 },
                 inline = inline,
                 inlineActions = inlineActions,
+                mentions = mentions,
                 botActions = botActions,
                 callbackAnswer = callbackAnswer,
                 login = login,

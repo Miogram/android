@@ -3,7 +3,6 @@ package app.miogram.feature.chat
 import app.miogram.data.telegram.BotsRepository
 import cn.ellerotta.core.model.InlineBot
 import cn.ellerotta.core.model.InlineState
-import cn.ellerotta.core.model.inlineMention
 import cn.ellerotta.core.model.inlineQueryOf
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -24,6 +23,7 @@ internal class ChatInline(
     private val scope: CoroutineScope,
     private val dialogKey: String,
     private val repository: BotsRepository,
+    private val person: (String) -> Boolean = { false },
 ) {
     private val state = MutableStateFlow(InlineState())
     private val text = MutableStateFlow("")
@@ -45,14 +45,18 @@ internal class ChatInline(
     private suspend fun follow(value: String) {
         paging?.cancel()
         val query = inlineQueryOf(value)
-        if (query == null) {
-            val mention = inlineMention(value)
-            val bots = if (mention == null) emptyList() else recentBots().filter { it.username.startsWith(mention, ignoreCase = true) }
-            state.value = InlineState(bots = bots)
+        if (query == null || person(query.username)) {
+            state.value = InlineState()
             return
         }
         val name = query.username.lowercase()
-        val bot = if (resolved.containsKey(name)) resolved[name] else quietly { repository.inlineBot(query.username) }.also { resolved[name] = it }
+        val bot = if (resolved.containsKey(name)) {
+            resolved[name]
+        } else {
+            val answer = quietly { Resolved(repository.inlineBot(query.username)) }
+            if (answer != null) resolved[name] = answer.bot
+            answer?.bot
+        }
         if (bot == null) {
             state.value = InlineState()
             return
@@ -85,7 +89,9 @@ internal class ChatInline(
         state.value = InlineState()
     }
 
-    private suspend fun recentBots(): List<InlineBot> = recent ?: (quietly { repository.recentInlineBots() } ?: emptyList()).also { recent = it }
+    suspend fun recentBots(): List<InlineBot> = recent ?: quietly { repository.recentInlineBots() }?.also { recent = it }.orEmpty()
+
+    private class Resolved(val bot: InlineBot?)
 
     private suspend fun <T> quietly(block: suspend () -> T): T? = try {
         block()

@@ -71,6 +71,23 @@ data class ContactRow(@PrimaryKey val peer: String, val mutual: Boolean, val lay
 @Entity(tableName = "stories")
 data class StoryRow(@PrimaryKey val peer: String, val hidden: Boolean, val maxRead: Int, val tl: ByteArray, val layer: Int)
 
+@Entity(tableName = "outgoing", indices = [Index("account")])
+data class OutgoingRow(
+    @PrimaryKey val id: Long,
+    val account: Long,
+    val dialog: String,
+    val topic: Int,
+    val batch: Long,
+    val date: Int,
+    val request: ByteArray,
+    val shown: ByteArray?,
+    val file: String? = null,
+    val thumb: String? = null,
+    val uploaded: Int = 0,
+    val media: ByteArray? = null,
+    val failed: String? = null,
+)
+
 data class Span(val low: Int?, val high: Int?, val count: Int)
 
 data class HistoryKey(val dialog: String, val topic: Int)

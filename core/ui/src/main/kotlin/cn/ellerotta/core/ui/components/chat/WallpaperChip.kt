@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
@@ -48,13 +47,13 @@ internal fun WallpaperChip(message: MessageItem, actions: ChatWallpaperActions?,
     LaunchedEffect(wallpaper.key) { if (wallpaper.kind != WallpaperKind.Fill && wallpaper.key !in actions.previews) actions.onLoad(wallpaper) }
     Box(modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
         Surface(
-            shape = RoundedCornerShape(28.dp),
+            shape = MaterialTheme.shapes.extraLarge,
             color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = GIFT_CHIP_ALPHA),
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
             modifier = Modifier.widthIn(max = 240.dp).testTag("wallpaperChip_${message.id}"),
         ) {
             Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                WallpaperImage(wallpaper, actions.previews[wallpaper.key], Modifier.size(width = 96.dp, height = 160.dp).clip(RoundedCornerShape(16.dp)).testTag("wallpaperChipPreview"), maxSide = CHIP_SIDE)
+                WallpaperImage(wallpaper, actions.previews[wallpaper.key], Modifier.size(width = 96.dp, height = 160.dp).clip(MaterialTheme.shapes.large).testTag("wallpaperChipPreview"), maxSide = CHIP_SIDE)
                 Text(text, style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
                 if (!message.out) {
                     FilledTonalButton(

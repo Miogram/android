@@ -56,6 +56,7 @@ import cn.ellerotta.core.model.asFormattedText
 import cn.ellerotta.core.model.toggled
 import cn.ellerotta.core.model.ChatAction
 import cn.ellerotta.core.model.ChatInfo
+import cn.ellerotta.core.model.ChatMember
 import cn.ellerotta.core.model.ChatWallpaper
 import cn.ellerotta.core.model.ForumTopic
 import cn.ellerotta.core.model.MemberCounts
@@ -252,7 +253,10 @@ class ChatViewModel @AssistedInject constructor(
 
     val unreadAfter: StateFlow<Int?> = unreadAfterState.asStateFlow()
     private val searching = ChatSearch(viewModelScope, dialogKey, messagesRepository, ::fail, topicId)
-    private val inlineMode = ChatInline(viewModelScope, dialogKey, bots)
+    private val inlineMode: ChatInline = ChatInline(viewModelScope, dialogKey, bots) { mentioning.person(it) }
+    private val mentioning: ChatMentions = ChatMentions(viewModelScope, dialogKey, { dialog.value?.kind }, channels, { inlineMode.recentBots() }) {
+        messagesState.value.asReversed().mapNotNull { it.senderKey }.distinct()
+    }
     private val pins = ChatPins(viewModelScope, dialogKey, topicId, pinsRepository, { workWith(it) }, ::prepare)
 
     val pinned: StateFlow<PinnedMessages> = pins.ui
@@ -312,7 +316,9 @@ class ChatViewModel @AssistedInject constructor(
         .map { state -> state[dialogKey].orEmpty().filter(::shown) }
         .distinctUntilChanged()
 
-    val messages: StateFlow<List<MessageItem>> = combine(messagesState, ephemeralHere, botDrafts.state, threadState, olderState) { list, shownEphemeral, drafts, thread, older ->
+    private val queued: StateFlow<List<MessageItem>> = messagesRepository.outgoing(dialogKey, topicId).stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val messages: StateFlow<List<MessageItem>> = combine(combine(messagesState, queued) { loaded, own -> loaded + own }, ephemeralHere, botDrafts.state, threadState, olderState) { list, shownEphemeral, drafts, thread, older ->
         val replaced = drafts.replaced[dialogKey].orEmpty()
         val here = drafts.drafts.filter { it.key == dialogKey && shown(it.message) }
         val ids = if (here.any { it.replacedBy != null }) list.mapTo(HashSet()) { it.id } else emptySet()
@@ -345,6 +351,10 @@ class ChatViewModel @AssistedInject constructor(
     val inline: StateFlow<InlineState> = inlineMode.ui
 
     fun inlineText(text: String) = inlineMode.text(text)
+
+    val mentions: StateFlow<List<ChatMember>> = mentioning.ui
+
+    fun mentionTyped(query: String?, atStart: Boolean) = mentioning.typed(query, atStart)
 
     fun moreInlineResults() = inlineMode.loadMore()
 
@@ -660,6 +670,8 @@ class ChatViewModel @AssistedInject constructor(
             viewModelScope.launch { notifier.clearChat(dialogKey) }
         }
         viewModelScope.launch { updates.events().collect(::apply) }
+        viewModelScope.launch { messagesRepository.outgoingProgress.collect(media::uploads) }
+        viewModelScope.launch { messagesRepository.outgoingSent.filter { it == dialogKey }.collect { runCatching { load() } } }
         viewModelScope.launch {
             updates.events().filter { it == ChatEvent.Reload }.debounce(RELOAD_PAUSE).collect {
                 runCatching {
@@ -670,7 +682,7 @@ class ChatViewModel @AssistedInject constructor(
             }
         }
         if (topicId == null) viewModelScope.launch { dialog.map { it?.draft }.distinctUntilChanged().collect(drafts::remote) }
-        viewModelScope.launch { inlineMode.ui.map { state -> state.bots.mapNotNull { it.avatarKey } }.distinctUntilChanged().collect(avatarStore::load) }
+        viewModelScope.launch { mentioning.ui.map { list -> list.mapNotNull { it.avatarKey } }.distinctUntilChanged().collect(avatarStore::load) }
         val kind = dialog.value?.kind
         if (dialogKey.startsWith("u") && (kind == null || kind == PeerKind.Bot)) webApps.loadMenuButton()
         webApps.loadAttachBots()
@@ -946,13 +958,9 @@ class ChatViewModel @AssistedInject constructor(
             drafts.sent()
             store.change(dialogKey) { it.copy(draft = null) }
         }
-        work {
-            try {
-                if (message.text.isNotEmpty()) messagesRepository.send(dialogKey, message.text, replyTo, message.entities, topicId)
-                messagesRepository.forward(forward.fromKey, forward.ids, dialogKey, forward.dropAuthor, forward.dropCaptions)
-            } finally {
-                load()
-            }
+        queued {
+            if (message.text.isNotEmpty()) messagesRepository.queueText(dialogKey, message.text, replyTo, message.entities, topicId)
+            messagesRepository.queueForward(forward.fromKey, forward.ids, dialogKey, forward.dropAuthor, forward.dropCaptions, topicId)
         }
     }
 
@@ -984,41 +992,30 @@ class ChatViewModel @AssistedInject constructor(
             work { ephemeral.send(dialogKey, bot, message.text, message.entities, replyTo = replyTo, topicId = topicId) }
             return
         }
-        val pending = MessageItem(
-            id = localId(),
-            text = message.text,
-            entities = message.entities,
-            out = true,
-            date = (System.currentTimeMillis() / 1000).toInt(),
-            pending = true,
-            replyTo = replyTo,
-            topicId = topicId,
-        )
-        messagesState.update { it + pending }
-        val randomId = Random.nextLong()
-        sendPending(pending.id, options) { messagesRepository.send(dialogKey, message.text, replyTo, message.entities, topicId, randomId, options) }
+        queued(options) { messagesRepository.queueText(dialogKey, message.text, replyTo, message.entities, topicId, options = options) }
     }
 
-    private class Resend(val ids: List<Int>, val options: SendOptions, val send: suspend () -> Unit)
+    private fun queued(options: SendOptions = SendOptions.None, enqueue: suspend () -> Long) = work {
+        messagesRepository.awaitOutgoing(enqueue())
+        options.scheduleDate?.let { scheduled.sent(it) }
+    }
+
+    private class Resend(val ids: List<Int>, val send: suspend () -> Unit)
 
     private val resends = HashMap<Int, Resend>()
 
-    private val leftovers = HashMap<Int, () -> Unit>()
-
     private var localIds = 0
 
-    private fun localId(): Int = Int.MAX_VALUE - localIds++
+    private fun localId(): Int = Int.MAX_VALUE - ARTICLE_IDS - localIds++
 
-    private fun sendPending(id: Int, options: SendOptions = SendOptions.None, send: suspend () -> Unit) = sendPending(listOf(id), options, send)
-
-    private fun sendPending(ids: List<Int>, options: SendOptions = SendOptions.None, send: suspend () -> Unit) {
-        val resend = Resend(ids, options, send)
+    private fun sendPending(id: Int, send: suspend () -> Unit) {
+        val ids = listOf(id)
+        val resend = Resend(ids, send)
         ids.forEach { resends[it] = resend }
         work {
             try {
                 send()
                 ids.forEach { resends -= it }
-                options.scheduleDate?.let { scheduled.sent(it) }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -1031,23 +1028,21 @@ class ChatViewModel @AssistedInject constructor(
     }
 
     fun retry(id: Int) {
-        val resend = resends[id] ?: return
+        val resend = resends[id]
+        if (resend == null) {
+            work { messagesRepository.retryOutgoing(dialogKey, id)?.let { messagesRepository.awaitOutgoing(it) } }
+            return
+        }
         if (messagesState.value.none { it.id == id && it.failed }) return
         messagesState.update { list -> list.map { if (it.id in resend.ids) it.copy(failed = false) else it } }
-        sendPending(resend.ids, resend.options, resend.send)
+        sendPending(id, resend.send)
     }
 
     fun edit(id: Int, text: FormattedText) {
         val message = text.trimmed()
         if (message.text.isEmpty()) return
         messagesState.update { list -> list.map { if (it.id == id) it.copy(text = message.text, entities = message.entities, edited = true) else it } }
-        work {
-            try {
-                messagesRepository.edit(dialogKey, id, message.text, message.entities)
-            } finally {
-                load()
-            }
-        }
+        queued { messagesRepository.queueEdit(dialogKey, id, message.text, message.entities) }
     }
 
     fun sendArticle(article: ArticleMessage, replyTo: Int? = null) {
@@ -1184,11 +1179,13 @@ class ChatViewModel @AssistedInject constructor(
             work { ephemeral.delete(dialogKey, info, shownOnlyHere.out) }
             return
         }
+        if (queued.value.any { it.id == id && it.failed }) {
+            work { messagesRepository.dropOutgoing(dialogKey, id) }
+            return
+        }
         if (messagesState.value.any { it.id == id && it.failed }) {
-            val gone = resends[id]?.ids ?: listOf(id)
-            gone.forEach { resends -= it }
-            gone.forEach { leftovers.remove(it)?.invoke() }
-            messagesState.update { list -> list.filter { it.id !in gone } }
+            resends -= id
+            messagesState.update { list -> list.filter { it.id != id } }
             return
         }
         messagesState.update { list -> list.filter { it.id != id } }
@@ -1221,7 +1218,7 @@ class ChatViewModel @AssistedInject constructor(
         work {
             albumsOf(picked, draft.asFile) { it.item.kind }.forEachIndexed { index, run ->
                 val runCaption = if (index == 0) text else FormattedText("")
-                if (run.size == 1) sendSingle(run.single().uri, draft.asFile, spoiler, runCaption, answered, options) else sendAlbum(run.map { it.uri }, draft.asFile, spoiler, runCaption, answered, options)
+                sendFiles(run.map { it.uri }, draft.asFile, spoiler, runCaption, answered, options)
             }
         }
     }
@@ -1241,94 +1238,44 @@ class ChatViewModel @AssistedInject constructor(
         }
     }
 
-    private fun uploadBubble(key: String, file: Attachment, caption: FormattedText, answered: Int?, groupedId: Long? = null): MessageItem {
-        val item = MediaItem(key = key, fileName = file.name, size = file.source.size, dcId = 0, isPhoto = false, kind = MediaKind.File)
-        return MessageItem(
-            id = localId(),
-            text = caption.text,
-            entities = caption.entities,
-            out = true,
-            date = (System.currentTimeMillis() / 1000).toInt(),
-            media = item,
-            pending = true,
-            replyTo = answered,
-            topicId = topicId,
-            groupedId = groupedId,
-        )
-    }
-
-    private suspend fun sendSingle(uri: Uri, asFile: Boolean, spoiler: Boolean, caption: FormattedText, answered: Int?, options: SendOptions) {
-        var opened: Pair<Attachment, OutgoingMedia>? = try {
-            outgoing(uri, asFile, spoiler)
+    private suspend fun sendFiles(uris: List<Uri>, asFile: Boolean, spoiler: Boolean, caption: FormattedText, answered: Int?, options: SendOptions) {
+        val opened = ArrayList<Pair<Attachment, OutgoingMedia>>()
+        val batch = try {
+            uris.forEach { opened += outgoing(it, asFile, spoiler) }
+            val files = opened.map { it.second }
+            if (files.size == 1) {
+                messagesRepository.queueFile(dialogKey, files.single(), caption, answered, topicId, options = options)
+            } else {
+                messagesRepository.queueAlbum(dialogKey, files, caption, answered, topicId, options = options)
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             fail(UiError.Message(e.message ?: "cannot open the file"))
             return
+        } finally {
+            opened.forEach { it.first.close() }
         }
-        val first = opened?.first ?: return
-        val randomId = Random.nextLong()
-        val key = "upload:${uploads++}"
-        val total = first.source.size
-        val kind = messagesRepository.uploadKindOf(first.mimeType, total, asFile)
-        val pending = uploadBubble(key, first, caption, answered)
-        messagesState.update { it + pending }
-        sendPending(pending.id, options) {
-            val (attachment, file) = opened ?: outgoing(uri, asFile, spoiler)
-            opened = null
-            media.progress(key, DownloadState.Progress(0, total))
-            try {
-                messagesRepository.sendFile(dialogKey, file, caption, answered, topicId, randomId, options).collect { progress ->
-                    media.progress(key, progress)
-                    typing.uploading(ChatAction.Upload(kind, percentOf(progress)))
-                }
-            } finally {
-                typing.cancel()
-                attachment.close()
-                media.finished(key)
-            }
-        }
+        val kinds = opened.map { (file, _) -> messagesRepository.uploadKindOf(file.mimeType, file.source.size, asFile) }
+        work { awaitUpload(batch, kinds, options) }
     }
 
-    private suspend fun sendAlbum(uris: List<Uri>, asFile: Boolean, spoiler: Boolean, caption: FormattedText, answered: Int?, options: SendOptions) {
-        val opening = ArrayList<Pair<Attachment, OutgoingMedia>>()
+    private suspend fun awaitUpload(batch: Long, kinds: List<UploadKind>, options: SendOptions) {
+        val keys = messagesRepository.outgoingKeys(batch, kinds.size)
+        val telling = viewModelScope.launch {
+            messagesRepository.outgoingProgress.collect { all ->
+                val index = keys.indexOfLast { it in all }
+                if (index >= 0) typing.uploading(ChatAction.Upload(kinds[index], percentOf(all.getValue(keys[index]))))
+            }
+        }
         try {
-            uris.forEach { opening += outgoing(it, asFile, spoiler) }
-        } catch (e: CancellationException) {
-            opening.forEach { it.first.close() }
-            throw e
-        } catch (e: Exception) {
-            opening.forEach { it.first.close() }
-            fail(UiError.Message(e.message ?: "cannot open the file"))
-            return
-        }
-        var opened: List<Pair<Attachment, OutgoingMedia>>? = opening
-        val randomIds = uris.map { Random.nextLong() }
-        val group = Long.MAX_VALUE - albums++
-        val keys = uris.map { "upload:${uploads++}" }
-        val kinds = opening.map { (file, _) -> messagesRepository.uploadKindOf(file.mimeType, file.source.size, asFile) }
-        val bubbles = opening.mapIndexed { index, (file, _) -> uploadBubble(keys[index], file, if (index == 0) caption else FormattedText(""), answered, group) }
-        messagesState.update { it + bubbles }
-        sendPending(bubbles.map { it.id }, options) {
-            val files = opened ?: uris.map { outgoing(it, asFile, spoiler) }
-            opened = null
-            files.forEachIndexed { index, (file, _) -> media.progress(keys[index], DownloadState.Progress(0, file.source.size)) }
-            try {
-                messagesRepository.sendAlbum(dialogKey, files.map { it.second }, caption, answered, topicId, randomIds, options).collect { step ->
-                    media.progress(keys[step.index], step.progress)
-                    typing.uploading(ChatAction.Upload(kinds[step.index], percentOf(step.progress)))
-                }
-            } finally {
-                typing.cancel()
-                files.forEach { it.first.close() }
-                keys.forEach(media::finished)
-            }
+            messagesRepository.awaitOutgoing(batch)
+            options.scheduleDate?.let { scheduled.sent(it) }
+        } finally {
+            telling.cancel()
+            typing.cancel()
         }
     }
-
-    private var albums = 0
-
-    private var uploads = 0
 
     private var topicRead = 0
 
@@ -1341,26 +1288,14 @@ class ChatViewModel @AssistedInject constructor(
         typing.stopRecording()
         val clip = voice.stop(send) ?: return typing.cancel()
         val answered = answered()
-        val key = "upload:${uploads++}"
-        val total = clip.file.length()
-        val item = MediaItem(key = key, fileName = clip.file.name, size = total, dcId = 0, isPhoto = false, kind = MediaKind.Voice, duration = clip.duration, waveform = clip.waveform)
-        val pending = MessageItem(id = localId(), text = "", out = true, date = (System.currentTimeMillis() / 1000).toInt(), media = item, pending = true, replyTo = answered, topicId = topicId)
-        messagesState.update { it + pending }
-        leftovers[pending.id] = { clip.file.delete() }
-        val randomId = Random.nextLong()
-        sendPending(pending.id, options) {
-            media.progress(key, DownloadState.Progress(0, total))
-            try {
-                messagesRepository.sendVoice(dialogKey, clip.file, clip.duration, clip.waveform, topicId, randomId, answered, options).collect { progress ->
-                    media.progress(key, progress)
-                    typing.uploading(ChatAction.Upload(UploadKind.Voice, percentOf(progress)))
-                }
-                leftovers -= pending.id
+        work {
+            val batch = try {
+                messagesRepository.queueVoice(dialogKey, clip.file, clip.duration, clip.waveform, topicId, replyTo = answered, options = options)
+            } catch (e: Exception) {
                 clip.file.delete()
-            } finally {
-                typing.cancel()
-                media.finished(key)
+                throw e
             }
+            awaitUpload(batch, listOf(UploadKind.Voice), options)
         }
     }
 
@@ -1467,13 +1402,7 @@ class ChatViewModel @AssistedInject constructor(
     private fun sendDocument(document: MediaItem) {
         typing.cancel()
         val answered = answered()
-        work {
-            try {
-                messagesRepository.sendDocument(dialogKey, document.key, topicId, answered)
-            } finally {
-                load()
-            }
-        }
+        queued { messagesRepository.queueDocument(dialogKey, document, topicId, answered) }
     }
 
     private fun answered(): Int? = replyTarget?.takeIf { it < EPHEMERAL_IDS }
@@ -1492,7 +1421,6 @@ class ChatViewModel @AssistedInject constructor(
         updates.follow(dialogKey, open = false)
         if (topicId == null) store.reading(dialogKey, open = false)
         voice.close()
-        leftovers.values.forEach { it() }
         drafts.leave()
     }
 
@@ -1508,6 +1436,8 @@ class ChatViewModel @AssistedInject constructor(
 
         const val VIDEO_THUMB = 320
         const val RELOAD_PAUSE = 400L
+
+        const val ARTICLE_IDS = 1_000_000
     }
 }
 

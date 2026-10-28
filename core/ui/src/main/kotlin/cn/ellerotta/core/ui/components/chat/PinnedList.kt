@@ -159,6 +159,7 @@ internal fun PinnedListContent(
                 onLiftedBounds = { bounds -> target?.let { if (it.bounds != bounds) target = it.copy(bounds = bounds) } },
                 contentPadding = PaddingValues(top = topBarHeight() + 8.dp, bottom = bottom + BUTTON_SPACE),
                 modifier = Modifier.fillMaxSize(),
+                themedBackground = wallpaper.isThemed(),
             )
             TopBar(pluralStringResource(R.plurals.chat_pinned_count, count, count), TopBarState.Shown, onBack = onClose, backTag = "pinnedListBack", titleTag = "pinnedListTitle")
             Button(

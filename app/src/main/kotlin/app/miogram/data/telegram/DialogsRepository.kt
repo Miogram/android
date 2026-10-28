@@ -1,5 +1,7 @@
 package app.miogram.data.telegram
 
+import cn.ellerotta.core.model.OutgoingLast
+import kotlinx.coroutines.flow.Flow
 import cn.ellerotta.core.model.ChatFolder
 import cn.ellerotta.core.model.ChatRemoval
 import cn.ellerotta.core.model.FolderLimits
@@ -85,6 +87,8 @@ data class StoredDialogs(val folders: List<ChatFolder>?, val dialogs: List<Dialo
 @Singleton
 class DialogsRepository @Inject constructor(private val telegram: TelegramClientHolder, private val appConfig: AppConfigRepository) {
     private val registry get() = telegram.peers
+
+    val outgoingLast: Flow<Map<String, OutgoingLast>> get() = telegram.queue.last
 
     private val folderPeers = ConcurrentHashMap<String, TypeInputPeer>()
 

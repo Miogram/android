@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -274,11 +275,11 @@ internal fun PinDialog(peerName: String?, notifies: Boolean, onConfirm: (silent:
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(notifies && !notify, peerName == null || forBoth) }, modifier = Modifier.testTag("confirmPin")) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = { onConfirm(notifies && !notify, peerName == null || forBoth) }, modifier = Modifier.testTag("confirmPin")) {
                 Text(stringResource(R.string.chat_pin))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+        dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }
 

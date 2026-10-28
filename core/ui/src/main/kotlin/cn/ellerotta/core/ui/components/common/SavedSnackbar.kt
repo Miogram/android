@@ -28,7 +28,7 @@ fun SavedSnackbar(key: Any, onOpen: () -> Unit, onDismiss: () -> Unit, modifier:
     }
     Snackbar(
         modifier = modifier.navigationBarsPadding().imePadding().padding(16.dp).testTag("savedDownload"),
-        action = { TextButton(onClick = onOpen, colors = ButtonDefaults.textButtonColors(contentColor = SnackbarDefaults.actionColor), modifier = Modifier.testTag("openDownload")) { Text(stringResource(R.string.downloads_open)) } },
+        action = { TextButton(onClick = onOpen, shapes = ButtonDefaults.shapes(), colors = ButtonDefaults.textButtonColors(contentColor = SnackbarDefaults.actionColor), modifier = Modifier.testTag("openDownload")) { Text(stringResource(R.string.downloads_open)) } },
     ) { Text(stringResource(R.string.downloads_saved)) }
 }
 
@@ -41,6 +41,6 @@ fun PremiumSpeedSnackbar(key: Any, upload: Boolean, speedup: Int, onDismiss: () 
     }
     Snackbar(
         modifier = modifier.navigationBarsPadding().imePadding().padding(16.dp).testTag("premiumSpeed"),
-        action = { TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = SnackbarDefaults.actionColor)) { Text(stringResource(R.string.premium_speed_ok)) } },
+        action = { TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes(), colors = ButtonDefaults.textButtonColors(contentColor = SnackbarDefaults.actionColor)) { Text(stringResource(R.string.premium_speed_ok)) } },
     ) { Text(stringResource(if (upload) R.string.premium_speed_upload else R.string.premium_speed_download, speedup)) }
 }

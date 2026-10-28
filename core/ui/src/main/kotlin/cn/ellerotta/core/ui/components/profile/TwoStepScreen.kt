@@ -185,7 +185,7 @@ private fun TwoStepOverview(state: TwoStepState, busy: Boolean, actions: TwoStep
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
                             modifier = Modifier
                                 .semantics { liveRegion = LiveRegionMode.Polite }
-                                .background(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.shapes.large)
+                                .background(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.shapes.extraLarge)
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
                                 .testTag("twoStepSaved"),
                         )
@@ -301,7 +301,7 @@ private fun CurrentStep(goal: TwoStepGoal, state: TwoStepState, busy: Boolean, a
         )
         if (state.status?.hasRecovery == true) {
             Spacer(Modifier.height(8.dp))
-            TextButton(onClick = actions.onForgot, enabled = !busy, modifier = Modifier.heightIn(min = 48.dp).testTag("twoStepForgot")) {
+            TextButton(onClick = actions.onForgot, enabled = !busy, shapes = ButtonDefaults.shapes(), modifier = Modifier.heightIn(min = 48.dp).testTag("twoStepForgot")) {
                 Text(stringResource(R.string.twostep_forgot))
             }
         }
@@ -363,7 +363,7 @@ private fun HintStep(busy: Boolean, actions: TwoStepActions) {
             label = { Text(stringResource(R.string.twostep_hint_label)) },
             singleLine = true,
             enabled = !busy,
-            shape = MaterialTheme.shapes.medium,
+            shape = MaterialTheme.shapes.large,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { if (!busy) actions.onHint(hint) }),
             modifier = Modifier.fillMaxWidth().focusRequester(focus).testTag("twoStepHintField"),
@@ -371,7 +371,7 @@ private fun HintStep(busy: Boolean, actions: TwoStepActions) {
         Spacer(Modifier.height(32.dp))
         ContinueButton(enabled = true, busy = busy, label = stringResource(R.string.common_next), onClick = { actions.onHint(hint) }, modifier = Modifier.testTag("twoStepContinue"))
         Spacer(Modifier.height(8.dp))
-        TextButton(onClick = { actions.onHint("") }, enabled = !busy, modifier = Modifier.heightIn(min = 48.dp).testTag("twoStepSkipHint")) {
+        TextButton(onClick = { actions.onHint("") }, enabled = !busy, shapes = ButtonDefaults.shapes(), modifier = Modifier.heightIn(min = 48.dp).testTag("twoStepSkipHint")) {
             Text(stringResource(R.string.twostep_skip))
         }
     }
@@ -395,7 +395,7 @@ private fun EmailStep(goal: TwoStepGoal, busy: Boolean, actions: TwoStepActions)
             label = { Text(stringResource(R.string.twostep_email_label)) },
             singleLine = true,
             enabled = !busy,
-            shape = MaterialTheme.shapes.medium,
+            shape = MaterialTheme.shapes.large,
             leadingIcon = { Icon(painterResource(R.drawable.ic_mail), null, Modifier.size(20.dp)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { if (valid && !busy) actions.onEmail(email) }),
@@ -405,7 +405,7 @@ private fun EmailStep(goal: TwoStepGoal, busy: Boolean, actions: TwoStepActions)
         ContinueButton(enabled = valid, busy = busy, label = stringResource(R.string.common_next), onClick = { actions.onEmail(email) }, modifier = Modifier.testTag("twoStepContinue"))
         if (goal == TwoStepGoal.Create) {
             Spacer(Modifier.height(8.dp))
-            TextButton(onClick = { skipping = true }, enabled = !busy, modifier = Modifier.heightIn(min = 48.dp).testTag("twoStepSkipEmail")) {
+            TextButton(onClick = { skipping = true }, enabled = !busy, shapes = ButtonDefaults.shapes(), modifier = Modifier.heightIn(min = 48.dp).testTag("twoStepSkipEmail")) {
                 Text(stringResource(R.string.twostep_skip))
             }
         }
@@ -462,7 +462,7 @@ private fun CodeStep(
             singleLine = true,
             isError = wrong,
             enabled = !busy,
-            shape = MaterialTheme.shapes.medium,
+            shape = MaterialTheme.shapes.large,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { if (code.isNotEmpty() && !busy) onSubmit(code) }),
             modifier = Modifier.fillMaxWidth().shake(wrongCount).focusRequester(focus).testTag("twoStepCode"),
@@ -471,7 +471,7 @@ private fun CodeStep(
         ContinueButton(enabled = code.isNotEmpty(), busy = busy, label = stringResource(R.string.common_next), onClick = { onSubmit(code) }, modifier = Modifier.testTag("twoStepContinue"))
         if (onResend != null) {
             Spacer(Modifier.height(8.dp))
-            TextButton(onClick = onResend, enabled = !busy, modifier = Modifier.heightIn(min = 48.dp).testTag("twoStepResend")) {
+            TextButton(onClick = onResend, enabled = !busy, shapes = ButtonDefaults.shapes(), modifier = Modifier.heightIn(min = 48.dp).testTag("twoStepResend")) {
                 Text(stringResource(R.string.twostep_code_resend))
             }
         }
@@ -539,7 +539,7 @@ private fun ColumnScope.SecretField(
         },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = imeAction),
         onKeyboardAction = { onDone() },
-        shape = MaterialTheme.shapes.medium,
+        shape = MaterialTheme.shapes.large,
         modifier = Modifier.fillMaxWidth().shake(wrongCount).focusRequester(focusRequester).testTag(tag),
     )
 }

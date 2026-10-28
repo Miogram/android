@@ -239,7 +239,7 @@ fun MessageBubble(
                     KeyboardUnder(message, onButton, emoji, widen = false) {
                         Column(horizontalAlignment = side, modifier = tap.testTag("message_${message.id}")) {
                             if (message.ephemeral != null || message.viaBot != null || message.forward != null) {
-                                GlassPill(RoundedCornerShape(12.dp), Modifier.padding(bottom = 4.dp)) {
+                                GlassPill(MaterialTheme.shapes.medium, Modifier.padding(bottom = 4.dp)) {
                                     Column(Modifier.padding(horizontal = 10.dp, vertical = 4.dp)) {
                                         message.ephemeral?.let { EphemeralHeader(message, it, Color.White) }
                                         message.viaBot?.let { ViaHeader(it, Color.White, onViaBot, Modifier.testTag("via_${message.id}")) }
@@ -422,7 +422,7 @@ private fun VisualBubble(
 
 @Composable
 private fun SenderHeader(message: MessageItem, bubble: BubbleColors, emoji: InlineEmoji, modifier: Modifier = Modifier) {
-    Surface(shape = SenderShape, color = bubble.container, contentColor = bubble.content, modifier = modifier.testTag("sender_${message.id}")) {
+    Surface(shape = MaterialTheme.shapes.medium, color = bubble.container, contentColor = bubble.content, modifier = modifier.testTag("sender_${message.id}")) {
         Row(Modifier.padding(horizontal = 10.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
                 message.senderName.orEmpty(),
@@ -446,7 +446,7 @@ private fun SenderHeader(message: MessageItem, bubble: BubbleColors, emoji: Inli
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
-                        .background(bubble.accent.copy(alpha = RANK_TINT).compositeOver(bubble.container), RankShape)
+                        .background(bubble.accent.copy(alpha = RANK_TINT).compositeOver(bubble.container), MaterialTheme.shapes.small)
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                         .testTag("senderRank_${message.id}"),
                 )
@@ -455,8 +455,6 @@ private fun SenderHeader(message: MessageItem, bubble: BubbleColors, emoji: Inli
     }
 }
 
-private val SenderShape = RoundedCornerShape(12.dp)
-private val RankShape = RoundedCornerShape(8.dp)
 private val STATUS_SIZE = 18.dp
 
 internal const val RANK_TINT = 0.12f

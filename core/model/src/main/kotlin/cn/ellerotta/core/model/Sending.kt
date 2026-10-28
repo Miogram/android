@@ -65,3 +65,7 @@ fun <T> albumsOf(items: List<T>, asFile: Boolean, kind: (T) -> AttachmentKind): 
     }
     return albums
 }
+
+data class OutgoingLast(val preview: Preview, val date: Int, val failed: Boolean)
+
+data class OutgoingUploads(val files: Int, val sent: Long, val total: Long)

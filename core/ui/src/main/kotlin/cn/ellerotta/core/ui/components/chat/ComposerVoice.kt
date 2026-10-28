@@ -193,7 +193,7 @@ private fun LockHint(visible: Boolean, progress: Float, modifier: Modifier = Mod
         enter = fadeIn(effects) + scaleIn(spatial, initialScale = 0.92f),
         exit = fadeOut(effects) + scaleOut(spatial, targetScale = 0.92f),
     ) {
-        Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer) {
+        Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer) {
             Box(Modifier.heightIn(min = 64.dp).padding(horizontal = 14.dp, vertical = 10.dp).testTag("lockHint"), contentAlignment = Alignment.Center) {
                 Icon(painterResource(if (progress >= 1f) R.drawable.ic_lock else R.drawable.ic_north), stringResource(R.string.chat_voice_lock_hint), Modifier.size(24.dp))
             }
@@ -208,7 +208,7 @@ internal fun RecordingShell(recording: VoiceRecording, locked: Boolean, drag: Fl
     val cancelDistance = with(LocalDensity.current) { CANCEL_DRAG.toPx() }
     val content = if (locked) colors.onSecondaryContainer else colors.onSurface
     Surface(
-        shape = MaterialTheme.shapes.extraLarge,
+        shape = MaterialTheme.shapes.extraLargeIncreased,
         color = colors.surfaceContainerHigh,
         modifier = modifier.height(ACTION_SIZE).graphicsLayer {
             scaleX = scale
@@ -216,7 +216,7 @@ internal fun RecordingShell(recording: VoiceRecording, locked: Boolean, drag: Fl
         },
     ) {
         Surface(
-            shape = MaterialTheme.shapes.extraLarge,
+            shape = MaterialTheme.shapes.extraLargeIncreased,
             color = if (locked) colors.secondaryContainer else colors.surfaceContainerLow,
             contentColor = content,
             modifier = Modifier.fillMaxWidth().padding(4.dp).height(FIELD_HEIGHT),

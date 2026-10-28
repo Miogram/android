@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -53,7 +52,7 @@ internal fun StickerGrid(list: List<MediaItem>, stickers: Map<String, ByteArray>
             Box(
                 Modifier
                     .padding(4.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(MaterialTheme.shapes.medium)
                     .combinedClickable(onLongClickLabel = previewLabel, onLongClick = { previewed = sticker }, onClick = { onPick?.invoke(sticker) })
                     .testTag("pick_${sticker.key}"),
                 contentAlignment = Alignment.Center,
@@ -77,7 +76,7 @@ fun StickerSuggestions(list: List<MediaItem>, stickers: Map<String, ByteArray>, 
                 LaunchedEffect(sticker.key) { if (stickers[sticker.key] == null) onLoadSticker(sticker) }
                 Box(
                     Modifier
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(MaterialTheme.shapes.medium)
                         .combinedClickable(onLongClickLabel = previewLabel, onLongClick = { previewed = sticker }, onClick = { onSend(sticker) })
                         .testTag("suggest_${sticker.key}"),
                 ) {

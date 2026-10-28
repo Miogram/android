@@ -113,7 +113,7 @@ fun ChatSecondaryInfo(
                 )
             }
             status?.invoke()
-            Text(text = time, style = typography.bodySmall, color = colorScheme.primary)
+            Text(text = time, style = typography.bodySmall, color = if (isUnread && !isMuted) colorScheme.primary else colorScheme.onSurfaceVariant)
         }
 
         if (isUnread) {
@@ -123,12 +123,12 @@ fun ChatSecondaryInfo(
                 horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
             ) {
                 AnimatedVisibility(visible = unreadMentionCount > 0, enter = enterTransition, exit = exitTransition) {
-                    Text(text = "@", style = typography.labelSmall, color = colorScheme.primary)
+                    Text(text = "@", style = typography.labelSmall, color = colorScheme.tertiary)
                 }
                 AnimatedVisibility(visible = unreadCount > 0 || unreadMark, enter = enterTransition, exit = exitTransition, modifier = unreadModifier) {
                     Badge(
-                        containerColor = if (isMuted) colorScheme.surfaceContainerHighest else colorScheme.primary,
-                        contentColor = if (isMuted) colorScheme.onSurfaceVariant else colorScheme.onPrimary,
+                        containerColor = if (isMuted) colorScheme.surfaceContainerHighest else colorScheme.tertiary,
+                        contentColor = if (isMuted) colorScheme.onSurfaceVariant else colorScheme.onTertiary,
                     ) {
                         Text(if (unreadCount > 0) compactCount(unreadCount) else "")
                     }

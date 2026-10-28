@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,7 +25,9 @@ import java.time.ZoneId
 private fun BubbleStage(wallpaper: ChatWallpaper? = null, content: @Composable ColumnScope.() -> Unit) {
     Box {
         ChatBackground(Modifier.matchParentSize(), wallpaper)
-        Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), content = content)
+        CompositionLocalProvider(LocalThemedBackground provides wallpaper.isThemed()) {
+            Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), content = content)
+        }
     }
 }
 

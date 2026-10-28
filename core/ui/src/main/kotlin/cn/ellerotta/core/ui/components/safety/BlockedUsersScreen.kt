@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -93,7 +94,7 @@ private fun BlockedRow(user: BlockedUser, avatar: ByteArray?, onOpen: () -> Unit
             Text(user.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             user.username?.let { Text("@$it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis) }
         }
-        TextButton(onClick = onUnblock, modifier = Modifier.heightIn(min = 48.dp).semantics { contentDescription = label }.testTag("unblock_${user.key}")) {
+        TextButton(onClick = onUnblock, shapes = ButtonDefaults.shapes(), modifier = Modifier.heightIn(min = 48.dp).semantics { contentDescription = label }.testTag("unblock_${user.key}")) {
             Text(stringResource(R.string.blocked_unblock))
         }
     }

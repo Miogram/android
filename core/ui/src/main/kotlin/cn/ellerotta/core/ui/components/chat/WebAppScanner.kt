@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -65,7 +64,7 @@ internal fun WebAppScannerDialog(scanner: WebAppScanner, onText: (String) -> Uni
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
         Box(Modifier.fillMaxSize().background(Color.Black).testTag("webAppScanner")) {
             QrCameraPreview(onText, Modifier.fillMaxSize())
-            Box(Modifier.align(Alignment.Center).size(SCANNER_FRAME.dp).border(2.dp, Color.White, RoundedCornerShape(24.dp)))
+            Box(Modifier.align(Alignment.Center).size(SCANNER_FRAME.dp).border(2.dp, Color.White, MaterialTheme.shapes.extraLarge))
             Column(Modifier.fillMaxWidth().statusBarsPadding().padding(8.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onClose, modifier = Modifier.testTag("webAppScannerClose"), shapes = IconButtonDefaults.shapes()) {

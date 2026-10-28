@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -34,7 +35,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import cn.ellerotta.core.model.InlineBot
+import cn.ellerotta.core.model.ChatMember
 import cn.ellerotta.core.model.InlineResult
 import cn.ellerotta.core.model.InlineResultKind
 import cn.ellerotta.core.model.InlineResults
@@ -48,22 +49,23 @@ class ChatInlineActions(
     val onSwitchPm: () -> Unit,
     val onLoad: (MediaItem) -> Unit,
     val onSwitchWebView: (theme: String) -> Unit = {},
+    val onMention: (query: String?, atStart: Boolean) -> Unit = { _, _ -> },
 )
 
 @Composable
-internal fun InlineBotList(bots: List<InlineBot>, avatars: Map<String, ByteArray>, onPick: (InlineBot) -> Unit) {
-    Surface(color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth().testTag("inlineBots")) {
+internal fun MentionList(members: List<ChatMember>, avatars: Map<String, ByteArray>, onPick: (ChatMember) -> Unit) {
+    Surface(color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth().testTag("mentions")) {
         LazyColumn(Modifier.heightIn(max = 220.dp)) {
-            items(bots, key = { it.key }) { bot ->
+            items(members, key = { it.userKey }) { member ->
                 Row(
-                    Modifier.fillMaxWidth().clickable { onPick(bot) }.padding(horizontal = 16.dp, vertical = 8.dp).testTag("inlineBot_${bot.username}"),
+                    Modifier.fillMaxWidth().clickable { onPick(member) }.padding(horizontal = 16.dp, vertical = 8.dp).testTag("mention_${member.userKey}"),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Avatar(bot.name, bot.avatarKey?.let(avatars::get), size = 36)
+                    Avatar(member.name, member.avatarKey?.let(avatars::get), size = 36)
                     Column {
-                        Text(bot.name, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        Text("@${bot.username}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                        Text(member.name, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        member.username?.let { Text("@$it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1) }
                     }
                 }
             }
@@ -85,10 +87,10 @@ internal fun InlineResultsPanel(
     Surface(color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth().testTag("inlineResults")) {
         Column {
             results.switchPm?.let { switch ->
-                TextButton(onClick = onSwitchPm, modifier = Modifier.fillMaxWidth().testTag("inlineSwitchPm")) { Text(switch.text) }
+                TextButton(onClick = onSwitchPm, modifier = Modifier.fillMaxWidth().testTag("inlineSwitchPm"), shapes = ButtonDefaults.shapes()) { Text(switch.text) }
             }
             results.switchWebView?.let { switch ->
-                TextButton(onClick = onSwitchWebView, modifier = Modifier.fillMaxWidth().testTag("inlineSwitchWebView")) { Text(switch.text) }
+                TextButton(onClick = onSwitchWebView, modifier = Modifier.fillMaxWidth().testTag("inlineSwitchWebView"), shapes = ButtonDefaults.shapes()) { Text(switch.text) }
             }
             val tiles = results.gallery || results.results.none { it.kind == InlineResultKind.Article }
             if (tiles) {
@@ -115,7 +117,7 @@ private fun MoreIndicator(onMore: () -> Unit) {
 @Composable
 private fun InlineTile(result: InlineResult, files: Map<String, ByteArray>, onLoad: (MediaItem) -> Unit, onClick: () -> Unit) {
     val thumb = result.thumb
-    Box(Modifier.size(TILE).clip(RoundedCornerShape(12.dp)).clickable(onClick = onClick).testTag("inline_${result.id}"), contentAlignment = Alignment.Center) {
+    Box(Modifier.size(TILE).clip(MaterialTheme.shapes.medium).clickable(onClick = onClick).testTag("inline_${result.id}"), contentAlignment = Alignment.Center) {
         if (thumb != null && result.kind == InlineResultKind.Sticker) {
             LaunchedEffect(thumb.key) { if (files[thumb.key] == null) onLoad(thumb) }
             StickerView(thumb, files[thumb.key], size = TILE, preview = files.previewOf(thumb))
@@ -132,7 +134,7 @@ private fun InlineRow(result: InlineResult, files: Map<String, ByteArray>, onLoa
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Thumb(result, files, onLoad, Modifier.size(48.dp).clip(RoundedCornerShape(10.dp)))
+        Thumb(result, files, onLoad, Modifier.size(48.dp).clip(MaterialTheme.shapes.medium))
         Column(Modifier.weight(1f)) {
             result.title?.let { Text(it, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis) }
             result.description?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis) }

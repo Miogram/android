@@ -204,7 +204,7 @@ class PlacesTest {
     @Test
     fun aVenueGoesOutWithItsProviderIdAndType(): Unit = withChat { repos, fake, saved ->
         val alexa = GeoPlace(52.5196, 13.4155, "ALEXA", "Grunerstraße 20", venue = Venue(Venue.GOOGLE, "ChIJ-alexa", "shopping_mall"))
-        repos.attach.sendPlace(saved, alexa)
+        repos.messages.awaitOutgoing(repos.attach.sendPlace(saved, alexa))
         val sent = assertIs<InputMediaVenue>(fake.attach.sent.single().media)
         assertEquals("gplaces", sent.provider)
         assertEquals("ChIJ-alexa", sent.venueId)

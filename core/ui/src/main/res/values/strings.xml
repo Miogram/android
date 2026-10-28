@@ -363,6 +363,11 @@
     <string name="chat_voice_unlistened">Not listened</string>
     <string name="chat_failed">Not sent</string>
     <string name="chat_retry">Send again</string>
+    <string name="chat_upload_channel">Sending files</string>
+    <plurals name="chat_uploading">
+        <item quantity="one">Sending %1$d file</item>
+        <item quantity="other">Sending %1$d files</item>
+    </plurals>
     <string name="error_microphone_denied">Allow the microphone in the app settings to record voice messages</string>
     <string name="error_camera_denied">Allow the camera in the app settings to take a photo</string>
     <string name="error_location_denied">Allow location in the app settings to share your live location</string>
@@ -465,6 +470,8 @@
     <string name="chats_muted">Muted</string>
     <string name="chats_read">Read</string>
     <string name="chats_sent">Sent</string>
+    <string name="chats_sending">Sending</string>
+    <string name="chats_send_failed">Not sent</string>
     <string name="chats_pinned">Pinned</string>
     <string name="chats_archive">Archived chats</string>
     <string name="chats_open_archive">Archived chats</string>

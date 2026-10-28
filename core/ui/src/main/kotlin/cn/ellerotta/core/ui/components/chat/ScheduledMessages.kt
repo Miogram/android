@@ -97,7 +97,7 @@ fun ScheduledScreen(title: String, messages: List<MessageItem>, loaded: Boolean,
             items(messages, key = { it.id }) { message ->
                 Box(Modifier.padding(horizontal = 16.dp)) {
                     ScheduledItem(message) { menu = message }
-                    DropdownMenu(expanded = menu?.id == message.id, onDismissRequest = { menu = null }, shape = RoundedCornerShape(20.dp)) {
+                    DropdownMenu(expanded = menu?.id == message.id, onDismissRequest = { menu = null }, shape = MaterialTheme.shapes.largeIncreased) {
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.chat_scheduled_send_now)) },
                             leadingIcon = { Icon(painterResource(R.drawable.ic_send), null) },
@@ -192,11 +192,11 @@ private fun EditScheduledDialog(message: MessageItem, onSave: (FormattedText) ->
         title = { Text(stringResource(R.string.chat_scheduled_edit)) },
         text = { FormattedField(text, { text = it }, stringResource(R.string.chat_message), "scheduledEditField") },
         confirmButton = {
-            TextButton(onClick = { onSave(text.trimmed()) }, enabled = text.text.isNotBlank() || message.media != null, modifier = Modifier.testTag("scheduledEditSave")) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = { onSave(text.trimmed()) }, enabled = text.text.isNotBlank() || message.media != null, modifier = Modifier.testTag("scheduledEditSave")) {
                 Text(stringResource(R.string.chat_article_save))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+        dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }
 

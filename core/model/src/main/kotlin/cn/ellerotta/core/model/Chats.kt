@@ -61,6 +61,8 @@ data class DialogItem(
     val support: Boolean = false,
     val outgoing: Boolean = false,
     val read: Boolean = false,
+    val sending: Boolean = false,
+    val sendFailed: Boolean = false,
     val typing: String? = null,
     val activity: ActivityKind = ActivityKind.Typing,
     val typingMore: List<String> = emptyList(),
@@ -158,3 +160,6 @@ data class FolderTab(val folder: ChatFolder, val dialogs: List<DialogItem>, val 
     val unreadChats: Int get() = dialogs.count { it.hasUnread }
     val mutedOnly: Boolean get() = dialogs.filter { it.hasUnread }.all { it.muted }
 }
+
+fun DialogItem.withOutgoing(last: OutgoingLast?): DialogItem =
+    if (last == null || last.date < date) this else copy(preview = last.preview, date = last.date, outgoing = true, read = false, sending = !last.failed, sendFailed = last.failed)

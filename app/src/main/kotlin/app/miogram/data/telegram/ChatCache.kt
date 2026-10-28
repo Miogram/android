@@ -282,6 +282,10 @@ internal class ChatCache(
         dao.older(dialog, topic, before, limit, layer, clock())?.let { messagesOf(it) }
     }
 
+    suspend fun message(dialog: String, id: Int): TypeMessage? = read("message") {
+        dao.message(dialog, id).firstOrNull { it.layer == layer }?.let { row -> decoded("message") { TypeMessage.decode(row.tl) } }
+    }
+
     suspend fun putOlder(dialog: String, topic: Int, before: Int, messages: List<TypeMessage>, users: List<TypeUser>, chats: List<TypeChat>, limit: Int) = write("history") {
         if (dao.putOlder(dialog, topic, before, rowsOf(dialog, topic, messages, users, chats), limit, MAX_MESSAGES, clock())) dao.putPeers(peerRows(users, chats))
     }

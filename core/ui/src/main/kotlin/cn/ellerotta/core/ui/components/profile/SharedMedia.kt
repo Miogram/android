@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LoadingIndicator
@@ -167,7 +166,7 @@ private fun LazyListScope.mediaGrid(tab: SharedTab, list: SharedList, locale: Lo
                             onDownload = context.onDownload,
                             onOpen = { actions.onOpenMedia(message, tab == SharedTab.Gifs) },
                             side = 128.dp,
-                            modifier = Modifier.weight(1f).aspectRatio(1f).clip(RoundedCornerShape(12.dp)),
+                            modifier = Modifier.weight(1f).aspectRatio(1f).clip(MaterialTheme.shapes.medium),
                             onLongPress = { onMenu(message) },
                         )
                     }

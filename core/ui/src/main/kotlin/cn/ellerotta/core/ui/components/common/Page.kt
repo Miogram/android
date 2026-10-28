@@ -53,6 +53,6 @@ fun Page(
 fun ErrorSnackbar(error: UiError, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     Snackbar(
         modifier = modifier.navigationBarsPadding().imePadding().padding(16.dp).testTag("error"),
-        action = { TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = SnackbarDefaults.actionColor)) { Text(stringResource(R.string.common_ok)) } },
+        action = { TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes(), colors = ButtonDefaults.textButtonColors(contentColor = SnackbarDefaults.actionColor)) { Text(stringResource(R.string.common_ok)) } },
     ) { Text(errorText(error)) }
 }

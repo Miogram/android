@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -85,7 +84,7 @@ internal fun MediaPreviewContent(
     onRemove: (() -> Unit)? = null,
 ) {
     Surface(
-        shape = MaterialTheme.shapes.extraLarge,
+        shape = MaterialTheme.shapes.extraLargeIncreased,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         contentColor = MaterialTheme.colorScheme.onSurface,
         modifier = modifier.testTag("mediaPreview"),
@@ -104,12 +103,12 @@ internal fun MediaPreviewContent(
                 }
             }
             onFave?.let {
-                TextButton(onClick = it, modifier = Modifier.testTag("previewFave")) {
+                TextButton(onClick = it, modifier = Modifier.testTag("previewFave"), shapes = ButtonDefaults.shapes()) {
                     Text(stringResource(if (faved) R.string.chat_preview_unfave else R.string.chat_preview_fave))
                 }
             }
             onRemove?.let {
-                TextButton(onClick = it, modifier = Modifier.testTag("previewRemove")) { Text(stringResource(R.string.chat_preview_remove_gif)) }
+                TextButton(onClick = it, modifier = Modifier.testTag("previewRemove"), shapes = ButtonDefaults.shapes()) { Text(stringResource(R.string.chat_preview_remove_gif)) }
             }
         }
     }
@@ -123,7 +122,7 @@ private fun GifPreview(gif: MediaItem, downloads: Map<String, DownloadState>) {
     val px = with(LocalDensity.current) { PREVIEW_SIDE.roundToPx() }
     val thumb = remember(gif, px) { gif.preview(px) }
     val file = (downloads[gif.key] as? DownloadState.Done)?.file
-    Box(Modifier.size(width, height).clip(RoundedCornerShape(PREVIEW_GIF_CORNER)).background(MaterialTheme.colorScheme.surfaceVariant)) {
+    Box(Modifier.size(width, height).clip(MaterialTheme.shapes.large).background(MaterialTheme.colorScheme.surfaceVariant)) {
         StillImage(gif, thumb?.let { downloads[it.key] })
         if (file != null) LoopingVideo(file, Modifier.fillMaxSize())
     }
@@ -134,4 +133,3 @@ private val PREVIEW_SIDE = 240.dp
 private val PREVIEW_PADDING = 20.dp
 private val PREVIEW_GAP = 16.dp
 private val PREVIEW_BUTTON_GAP = 8.dp
-private val PREVIEW_GIF_CORNER = 16.dp

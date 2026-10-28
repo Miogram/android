@@ -203,10 +203,11 @@ class RepositoryFlowTest {
                 assertEquals("report.pdf", document.fileName)
                 assertEquals(upload.size.toLong(), document.size)
 
-                val recording = dir.resolve("recording.ogg").apply { writeBytes(kotlin.random.Random(9).nextBytes(20_000)) }
+                val clip = kotlin.random.Random(9).nextBytes(20_000)
+                val recording = dir.resolve("recording.ogg").apply { writeBytes(clip) }
                 val samples = List(100) { it % 32 }
                 repos.messages.sendVoice(dialogs[0].key, recording, 3, samples).toList()
-                assertContentEquals(recording.readBytes(), fake.lastUpload)
+                assertContentEquals(clip, fake.lastUpload)
                 val voice = assertNotNull(repos.messages.history(dialogs[0].key).last().media)
                 assertEquals(MediaKind.Voice, voice.kind)
                 assertEquals(3, voice.duration)

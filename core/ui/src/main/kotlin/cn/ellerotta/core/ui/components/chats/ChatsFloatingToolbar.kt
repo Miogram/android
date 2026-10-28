@@ -54,7 +54,7 @@ internal fun ChatsFloatingToolbar(
         modifier = modifier.padding(bottom = 8.dp),
         shape = RoundedCornerShape(100),
         colors = FloatingToolbarDefaults.standardFloatingToolbarColors(
-            toolbarContainerColor = MaterialTheme.colorScheme.surface,
+            toolbarContainerColor = MaterialTheme.colorScheme.surfaceContainer,
             toolbarContentColor = MaterialTheme.colorScheme.onSurface,
         ),
     ) {

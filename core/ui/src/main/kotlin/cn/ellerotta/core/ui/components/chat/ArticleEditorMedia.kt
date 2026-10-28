@@ -56,7 +56,7 @@ internal fun mediaLabel(kind: ArticleMediaKind): Int = when (kind) {
 @Composable
 internal fun EditorMedia(row: ArticleRow, upload: ArticleUpload?, onRetry: () -> Unit, onRemove: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    Surface(color = colors.surfaceContainerHigh, shape = RoundedCornerShape(8.dp), modifier = Modifier.fillMaxWidth().testTag("articleMedia_${row.id}")) {
+    Surface(color = colors.surfaceContainerHigh, shape = MaterialTheme.shapes.small, modifier = Modifier.fillMaxWidth().testTag("articleMedia_${row.id}")) {
         Row(Modifier.padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(painterResource(mediaIcon(upload?.kind ?: row.block?.mediaKind)), null, tint = colors.primary, modifier = Modifier.size(24.dp))
             Spacer(Modifier.width(12.dp))

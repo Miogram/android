@@ -383,6 +383,13 @@
     <string name="chat_voice_unlistened">Не прослушано</string>
     <string name="chat_failed">Не отправлено</string>
     <string name="chat_retry">Отправить снова</string>
+    <string name="chat_upload_channel">Отправка файлов</string>
+    <plurals name="chat_uploading">
+        <item quantity="one">Отправляется %1$d файл</item>
+        <item quantity="few">Отправляются %1$d файла</item>
+        <item quantity="many">Отправляются %1$d файлов</item>
+        <item quantity="other">Отправляются %1$d файла</item>
+    </plurals>
     <string name="error_microphone_denied">Разрешите доступ к микрофону в настройках приложения, чтобы записывать голосовые сообщения</string>
     <string name="error_camera_denied">Разрешите доступ к камере в настройках приложения, чтобы сделать снимок</string>
     <string name="error_location_denied">Разрешите доступ к геопозиции в настройках приложения, чтобы транслировать её</string>
@@ -491,6 +498,8 @@
     <string name="chats_muted">Без звука</string>
     <string name="chats_read">Прочитано</string>
     <string name="chats_sent">Отправлено</string>
+    <string name="chats_sending">Отправляется</string>
+    <string name="chats_send_failed">Не отправлено</string>
     <string name="chats_pinned">Закреплён</string>
     <string name="chats_archive">Архив</string>
     <string name="chats_open_archive">Архивные чаты</string>

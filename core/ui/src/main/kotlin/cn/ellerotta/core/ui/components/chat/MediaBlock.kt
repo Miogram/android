@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -38,7 +37,7 @@ internal fun MediaBlock(media: MediaItem, downloads: Map<String, DownloadState>,
     Column(Modifier.padding(bottom = 6.dp)) {
         val name = stringResource(if (media.isPhoto) R.string.chat_photo else R.string.chat_file, media.fileName)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(40.dp).clip(MaterialTheme.shapes.medium), contentAlignment = Alignment.Center) {
                 Surface(color = colors.accent, modifier = Modifier.size(40.dp)) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(painterResource(if (media.isPhoto) R.drawable.ic_image else R.drawable.ic_description), null, tint = colors.onAccent)
@@ -69,7 +68,7 @@ internal fun MediaBlock(media: MediaItem, downloads: Map<String, DownloadState>,
             is DownloadState.Done -> {
                 if (media.isPhoto) {
                     val bitmap = remember(state.file) { BitmapFactory.decodeFile(state.file.path)?.asImageBitmap() }
-                    if (bitmap != null) Image(bitmap, media.fileName, modifier = Modifier.fillMaxWidth().padding(top = 6.dp).clip(RoundedCornerShape(14.dp)))
+                    if (bitmap != null) Image(bitmap, media.fileName, modifier = Modifier.fillMaxWidth().padding(top = 6.dp).clip(MaterialTheme.shapes.medium))
                 }
                 Text(stringResource(R.string.chat_saved_file, state.file.name, state.file.length()), style = MaterialTheme.typography.labelSmall, modifier = Modifier.testTag("downloaded_${media.key}"))
             }

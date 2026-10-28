@@ -178,4 +178,27 @@ class ChatDatabaseMigrationTest {
             file.parentFile?.deleteRecursively()
         }
     }
+
+    @Test
+    fun version5KeepsItsRowsAndGetsTheMessagesOnTheirWay(): Unit = runBlocking {
+        val file = File(Files.createTempDirectory("db").toFile(), "chats.db")
+        create(file, 5)
+        SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READWRITE).use { db ->
+            db.insertOrThrow("dialogs", null, dialog("u1", DialogRow.FOLLOWS_DEFAULT))
+        }
+
+        val database = ChatDatabase.open(ApplicationProvider.getApplicationContext(), file)
+        try {
+            assertEquals(listOf("u1"), database.chats().allDialogs().map { it.dialog })
+            val outgoing = database.outgoing()
+            outgoing.put(listOf(OutgoingRow(id = 3, account = 42, dialog = "u1", topic = 0, batch = 3, date = 9, request = byteArrayOf(1), shown = null, file = "3.ogg")))
+            outgoing.uploaded(3, 2)
+            assertEquals(listOf(Triple(3L, 2, "3.ogg")), outgoing.rows(42).map { Triple(it.id, it.uploaded, it.file) })
+            database.chats().clear()
+            assertEquals(emptyList(), outgoing.rows(42))
+        } finally {
+            database.close()
+            file.parentFile?.deleteRecursively()
+        }
+    }
 }

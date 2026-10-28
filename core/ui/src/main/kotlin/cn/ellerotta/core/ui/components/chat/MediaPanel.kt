@@ -40,7 +40,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.FilledTonalButton
@@ -724,7 +723,7 @@ private fun PackBar(packs: List<PackItem>, current: Int, stickers: Map<String, B
             Box(
                 Modifier
                     .size(PACK_CELL)
-                    .clip(RoundedCornerShape(PACK_CORNER))
+                    .clip(MaterialTheme.shapes.medium)
                     .background(fill)
                     .clickable { onSelect(index) }
                     .semantics {
@@ -778,7 +777,7 @@ private fun TabBar(shown: PanelTab, onSelect: (PanelTab) -> Unit, onBackspace: (
                 ) {
                     Text(
                         stringResource(TAB_NAMES.getValue(tab)),
-                        style = MaterialTheme.typography.labelLarge,
+                        style = if (chosen) MaterialTheme.typography.labelLargeEmphasized else MaterialTheme.typography.labelLarge,
                         color = if (chosen) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.background(fill, CircleShape).padding(horizontal = 14.dp, vertical = 6.dp),
                     )
@@ -799,7 +798,7 @@ private fun EmojiCell(emoji: String, tag: String, tones: List<String>? = null, o
     val size = with(LocalDensity.current) { EMOJI_GLYPH.toSp() }
     var toning by remember { mutableStateOf(false) }
     Box(
-        Modifier.aspectRatio(1f).clip(RoundedCornerShape(10.dp))
+        Modifier.aspectRatio(1f).clip(MaterialTheme.shapes.medium)
             .combinedClickable(onLongClick = tones?.let { { toning = true } }, onClick = onClick)
             .testTag(tag),
         contentAlignment = Alignment.Center,
@@ -807,11 +806,11 @@ private fun EmojiCell(emoji: String, tag: String, tones: List<String>? = null, o
         Text(emoji, fontSize = size, maxLines = 1)
         if (toning && tones != null) {
             Popup(popupPositionProvider = AboveAnchor, onDismissRequest = { toning = false }, properties = PopupProperties(focusable = true)) {
-                Surface(shape = RoundedCornerShape(14.dp), tonalElevation = 3.dp, shadowElevation = 6.dp, modifier = Modifier.testTag("emojiTones")) {
+                Surface(shape = MaterialTheme.shapes.large, tonalElevation = 3.dp, shadowElevation = 6.dp, modifier = Modifier.testTag("emojiTones")) {
                     Row(Modifier.padding(4.dp)) {
                         tones.forEachIndexed { index, toned ->
                             Box(
-                                Modifier.size(EMOJI_CELL).clip(RoundedCornerShape(10.dp)).clickable {
+                                Modifier.size(EMOJI_CELL).clip(MaterialTheme.shapes.medium).clickable {
                                     toning = false
                                     onTone(toned)
                                 }.testTag("emojiTone_$index"),
@@ -842,7 +841,7 @@ private fun CustomEmojiCell(cell: Cell.Custom, stickers: Map<String, ByteArray>,
     Box(
         Modifier
             .aspectRatio(1f)
-            .clip(RoundedCornerShape(10.dp))
+            .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
             .semantics { contentDescription = cell.alt }
             .testTag("customEmoji_${cell.key}"),
@@ -865,7 +864,7 @@ private fun StickerCell(cell: Cell.Sticker, stickers: Map<String, ByteArray>, ac
         Modifier
             .aspectRatio(1f)
             .padding(2.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .clip(MaterialTheme.shapes.medium)
             .combinedClickable(
                 onClickLabel = stringResource(if (cell.opensSet) R.string.chat_preview_set else R.string.chat_preview_send),
                 onLongClickLabel = stringResource(R.string.chat_preview),
@@ -989,7 +988,6 @@ internal val COMPACT_PANEL_HEIGHT = 170.dp
 private val TAB_BAR = 48.dp
 private val PACK_BAR = 48.dp
 private val PACK_CELL = 40.dp
-private val PACK_CORNER = 10.dp
 private val PACK_ICON = 24.dp
 private val PACK_THUMB = 28.dp
 private val PACK_DOT = 7.dp

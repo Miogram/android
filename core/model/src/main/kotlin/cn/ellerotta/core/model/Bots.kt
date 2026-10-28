@@ -34,7 +34,6 @@ data class InlineState(
     val results: InlineResults? = null,
     val more: Boolean = false,
     val loading: Boolean = false,
-    val bots: List<InlineBot> = emptyList(),
 )
 
 data class InlineQuery(val username: String, val query: String)
@@ -44,10 +43,7 @@ fun inlineQueryOf(text: String): InlineQuery? {
     return InlineQuery(match.groupValues[1], match.groupValues[2])
 }
 
-fun inlineMention(text: String): String? = INLINE_MENTION.matchEntire(text)?.groupValues?.get(1)
-
-private val INLINE_QUERY = Regex("@([a-zA-Z][a-zA-Z0-9_]{3,31}) (.*)", RegexOption.DOT_MATCHES_ALL)
-private val INLINE_MENTION = Regex("@([a-zA-Z0-9_]{0,32})")
+private val INLINE_QUERY = Regex("@([a-zA-Z][a-zA-Z0-9_]{2,31}) (.*)", RegexOption.DOT_MATCHES_ALL)
 
 enum class BotButtonStyle { Default, Primary, Danger, Success, Link }
 

@@ -240,7 +240,7 @@ private fun ComposerPill(
     onAttachBot: (AttachMenuBot) -> Unit,
 ) {
     Surface(
-        shape = MaterialTheme.shapes.extraLarge,
+        shape = MaterialTheme.shapes.extraLargeIncreased,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         modifier = Modifier.heightIn(min = ACTION_SIZE).animateContentSize(MaterialTheme.motionScheme.fastSpatialSpec()),
     ) {
@@ -248,7 +248,7 @@ private fun ComposerPill(
             if (menuButton != null) {
                 Surface(
                     onClick = onMenuButton,
-                    shape = MaterialTheme.shapes.extraLarge,
+                    shape = MaterialTheme.shapes.extraLargeIncreased,
                     color = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 8.dp).heightIn(min = 40.dp).widthIn(max = MENU_BUTTON_MAX).testTag("botMenuButton"),
@@ -262,7 +262,7 @@ private fun ComposerPill(
                 var menu by remember { mutableStateOf(false) }
                 Box {
                     PillButton(R.drawable.ic_attach_file, stringResource(R.string.chat_attach), "attach", Modifier.rotate(45f)) { menu = true }
-                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, shape = RoundedCornerShape(20.dp)) {
+                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, shape = MaterialTheme.shapes.largeIncreased) {
                         onAttachMedia?.let { pick ->
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.chat_attach_media)) },
@@ -334,7 +334,7 @@ private fun ComposerPill(
             }
             if (onArticle != null && articleDraft == null) PillButton(R.drawable.ic_article, stringResource(R.string.chat_article_editor), "articleOpen", onClick = onArticle)
             Surface(
-                shape = MaterialTheme.shapes.extraLarge,
+                shape = MaterialTheme.shapes.extraLargeIncreased,
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
                 modifier = Modifier.weight(1f).padding(start = 4.dp, top = 4.dp, bottom = 4.dp).heightIn(min = FIELD_HEIGHT, max = FIELD_MAX_HEIGHT),
             ) {

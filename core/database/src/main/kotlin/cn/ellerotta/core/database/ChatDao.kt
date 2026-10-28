@@ -346,6 +346,9 @@ abstract class ChatDao {
     @Query("DELETE FROM custom_emoji")
     abstract suspend fun dropAllCustomEmoji()
 
+    @Query("DELETE FROM outgoing")
+    abstract suspend fun dropAllOutgoing()
+
     @Transaction
     open suspend fun clear() {
         dropAllDialogs()
@@ -358,5 +361,6 @@ abstract class ChatDao {
         dropAllCustomEmoji()
         dropAllContacts()
         dropAllStories()
+        dropAllOutgoing()
     }
 }

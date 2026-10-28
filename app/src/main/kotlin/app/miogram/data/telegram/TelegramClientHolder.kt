@@ -1,6 +1,7 @@
 package app.miogram.data.telegram
 
 import cn.ellerotta.core.database.ChatDatabase
+import cn.ellerotta.core.database.OutgoingDao
 import cn.ellerotta.core.model.ConfigSummary
 import cn.ellerotta.core.model.LogLine
 import cn.ellerotta.ktproto.KtprotoVersion
@@ -85,6 +86,10 @@ class TelegramClientHolder(
 
     internal val sessionEnded: Flow<Unit> = endedSignals.receiveAsFlow()
 
+    private val accountEnds = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
+    internal val accountEnded: SharedFlow<Unit> = accountEnds.asSharedFlow()
+
     private val premiumWaits = MutableSharedFlow<ClientEvent.PremiumSpeedLimited>(extraBufferCapacity = 8)
 
     internal val premiumSpeedLimits: SharedFlow<ClientEvent.PremiumSpeedLimited> = premiumWaits.asSharedFlow()
@@ -102,6 +107,10 @@ class TelegramClientHolder(
     internal val peers = PeerRegistry(chatMutes, selfId = { userId }) { peerCache }
 
     internal val cache: ChatCache? = database?.let { ChatCache(it, log = { line -> log(line) }) }
+
+    private val outgoing: OutgoingDao? = database?.outgoing()
+
+    internal val queue = OutgoingQueue(this, outgoing, File(filesDir, "outgoing"), scope)
 
     internal val memory = ScreenMemory()
 
@@ -171,6 +180,7 @@ class TelegramClientHolder(
                     unwatch()
                     cache?.clear()
                     peers.forgetMutes()
+                    accountEnds.tryEmit(Unit)
                     if (loggedIn.getAndSet(false)) {
                         logger.log("the session was ended elsewhere")
                         endedSignals.trySend(Unit)

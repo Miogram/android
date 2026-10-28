@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -86,7 +87,7 @@ internal fun LazyListScope.searchFilterRow(filter: SearchFilter, onFilter: (Sear
                 FilterChip(
                     selected = selected,
                     onClick = { onFilter(if (selected) SearchFilter.All else kind) },
-                    label = { Text(stringResource(kind.label())) },
+                    label = { Text(stringResource(kind.label()), style = if (selected) MaterialTheme.typography.labelLargeEmphasized else MaterialTheme.typography.labelLarge) },
                     leadingIcon = if (selected) {
                         { Icon(painterResource(R.drawable.ic_check), null) }
                     } else {
@@ -146,7 +147,7 @@ internal fun LazyListScope.recentSearches(recent: List<String>, onSearch: (Strin
     item(key = "recentTitle") {
         Row(Modifier.fillMaxWidth().padding(end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             SectionTitle(stringResource(R.string.chats_search_recent), Modifier.weight(1f))
-            TextButton(onClick = onClear, modifier = Modifier.testTag("clearRecent")) { Text(stringResource(R.string.chats_search_recent_clear)) }
+            TextButton(onClick = onClear, modifier = Modifier.testTag("clearRecent"), shapes = ButtonDefaults.shapes()) { Text(stringResource(R.string.chats_search_recent_clear)) }
         }
     }
     items(recent, key = { "recent_$it" }) { query ->

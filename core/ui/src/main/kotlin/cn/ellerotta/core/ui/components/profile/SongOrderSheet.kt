@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -77,7 +76,7 @@ internal fun SongOrderContent(songs: List<MediaItem>, covers: Map<String, ByteAr
                 ) {
                     val bytes = song.cover()?.let { covers[it.key] } ?: song.thumb
                     val image = remember(bytes) { bytes?.let { BitmapFactory.decodeByteArray(it, 0, it.size)?.asImageBitmap() } }
-                    Box(Modifier.size(ORDER_COVER).clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.surfaceContainerHighest), contentAlignment = Alignment.Center) {
+                    Box(Modifier.size(ORDER_COVER).clip(MaterialTheme.shapes.small).background(MaterialTheme.colorScheme.surfaceContainerHighest), contentAlignment = Alignment.Center) {
                         if (image != null) {
                             Image(image, null, Modifier.size(ORDER_COVER), contentScale = ContentScale.Crop)
                         } else {

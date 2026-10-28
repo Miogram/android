@@ -39,7 +39,7 @@ import kotlin.math.floor
 import kotlin.math.roundToInt
 import androidx.compose.ui.util.lerp as lerpFloat
 
-class PillTabLabel(val color: Color, val weight: FontWeight, val style: TextStyle)
+class PillTabLabel(val color: Color, val style: TextStyle)
 
 private class TabBounds {
     var lefts = FloatArray(0)
@@ -66,7 +66,9 @@ internal fun PillTabRow(
     val pillColor = MaterialTheme.colorScheme.secondaryContainer
     val selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer
     val unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-    val style = if (small) MaterialTheme.typography.labelLarge else MaterialTheme.typography.titleMedium
+    val typography = MaterialTheme.typography
+    val style = if (small) typography.labelLarge else typography.titleMedium
+    val chosenStyle = if (small) typography.labelLargeEmphasized else typography.titleMediumEmphasized
     val inset = if (small) 0.dp else 8.dp
 
     val bounds = remember { TabBounds() }
@@ -100,8 +102,7 @@ internal fun PillTabRow(
                         val selectionFraction = 1f - distance
                         val label = PillTabLabel(
                             color = lerp(unselectedTextColor, selectedTextColor, selectionFraction),
-                            weight = if (selectionFraction > 0.5f) FontWeight.SemiBold else FontWeight.Normal,
-                            style = style,
+                            style = if (selectionFraction > 0.5f) chosenStyle else style.copy(fontWeight = FontWeight.Normal),
                         )
                         val chosen = index == selected
                         Box {

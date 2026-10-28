@@ -28,6 +28,11 @@ import cn.ellerotta.core.model.MessageItem
 import cn.ellerotta.core.ui.components.chat.ChatInlineActions
 import cn.ellerotta.core.ui.components.chat.ChatScreen
 import cn.ellerotta.core.ui.components.chat.ChatBotActions
+import cn.ellerotta.core.model.ChatMember
+import cn.ellerotta.core.model.EntityType
+import cn.ellerotta.core.model.FormattedText
+import cn.ellerotta.core.model.TextEntity
+import androidx.compose.ui.semantics.getOrNull
 import cn.ellerotta.core.model.BotButton
 import cn.ellerotta.core.model.CallbackAnswer
 import cn.ellerotta.core.model.KeyboardChange
@@ -69,15 +74,19 @@ class BotsTest {
 
     private fun editable(text: String) = SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString(text))
 
+    private fun typedText(text: String) = SemanticsMatcher("typed text \"$text\"") { it.config.getOrNull(SemanticsProperties.EditableText)?.text == text }
+
     @Test
     fun inlineBotsShowPlaceholderResultsAndRecentBots() {
         val texts = mutableListOf<String>()
+        val typed = mutableListOf<Pair<String?, Boolean>>()
         val sent = mutableListOf<Pair<String, Int?>>()
         var more = 0
         var switched = 0
         val loaded = mutableListOf<String>()
         val themes = mutableListOf<String>()
         var state by mutableStateOf(InlineState())
+        var mentions by mutableStateOf(emptyList<ChatMember>())
         val actions = ChatInlineActions(
             onText = { texts += it },
             onMore = { more++ },
@@ -85,21 +94,23 @@ class BotsTest {
             onSwitchPm = { switched++ },
             onLoad = { loaded += it.key },
             onSwitchWebView = { theme -> themes += theme },
+            onMention = { query, atStart -> typed += query to atStart },
         )
         compose.setContent {
             MioTheme {
                 ChatScreen(
                     title = "Saved", messages = listOf(MessageItem(4, "answer me", out = false, date = now)), downloads = emptyMap(), busy = false,
-                    onBack = {}, onSend = {}, onDownload = {}, inline = state, inlineActions = actions,
+                    onBack = {}, onSend = {}, onDownload = {}, inline = state, inlineActions = actions, mentions = mentions,
                 )
             }
         }
         compose.onNodeWithTag("messageInput").performTextInput("@gi")
-        compose.waitUntil(5_000) { texts.lastOrNull() == "@gi" }
-        state = InlineState(bots = listOf(bot))
-        compose.onNodeWithTag("inlineBot_gifbot").performClick()
+        compose.waitUntil(5_000) { typed.lastOrNull() == ("gi" to true) }
+        mentions = listOf(ChatMember(bot.key, bot.name, bot = true, username = bot.username, firstName = bot.name))
+        compose.onNodeWithTag("mention_${bot.key}").performClick()
         compose.onNode(editable("@gifbot ")).assertIsDisplayed()
-        compose.waitUntil(5_000) { texts.lastOrNull() == "@gifbot " }
+        compose.waitUntil(5_000) { texts.lastOrNull() == "@gifbot " && typed.lastOrNull() == (null to false) }
+        assertTrue(compose.onAllNodes(hasTestTag("mentions")).fetchSemanticsNodes().isEmpty())
 
         state = InlineState(bot = bot, results = results, more = true)
         compose.onNodeWithTag("composerHint", useUnmergedTree = true).assertIsDisplayed()
@@ -125,6 +136,35 @@ class BotsTest {
         compose.onNodeWithTag("inline_kotlin").performClick()
         assertEquals(listOf<Pair<String, Int?>>("kotlin" to null), sent)
         compose.onNode(editable("")).assertIsDisplayed()
+    }
+
+    @Test
+    fun mentionsPutUsernamesOrHighlightedMentionsByName() {
+        val typed = mutableListOf<Pair<String?, Boolean>>()
+        val sent = mutableListOf<FormattedText>()
+        val carol = ChatMember("u503", "Carol Writer", username = "carol_writer", firstName = "Carol")
+        val alice = ChatMember("u501", "Alice Example", firstName = "Alice")
+        var mentions by mutableStateOf(emptyList<ChatMember>())
+        val actions = ChatInlineActions(onText = {}, onMore = {}, onSend = { _, _ -> }, onSwitchPm = {}, onLoad = {}, onMention = { query, atStart -> typed += query to atStart })
+        compose.setContent {
+            MioTheme {
+                ChatScreen(title = "Team", messages = emptyList(), downloads = emptyMap(), busy = false, onBack = {}, onSend = { sent += it }, onDownload = {}, inlineActions = actions, mentions = mentions)
+            }
+        }
+        compose.onNodeWithTag("messageInput").performTextInput("hi @ca")
+        compose.waitUntil(5_000) { typed.lastOrNull() == ("ca" to false) }
+        mentions = listOf(carol)
+        compose.onNodeWithTag("mention_u503").performClick()
+        compose.onNode(editable("hi @carol_writer ")).assertIsDisplayed()
+
+        compose.onNodeWithTag("messageInput").performTextInput("and @al")
+        compose.waitUntil(5_000) { typed.lastOrNull() == ("al" to false) }
+        mentions = listOf(alice)
+        compose.onNodeWithTag("mention_u501").performClick()
+        compose.onNode(typedText("hi @carol_writer and Alice ")).assertIsDisplayed()
+        assertTrue(compose.onAllNodes(hasTestTag("mentions")).fetchSemanticsNodes().isEmpty())
+        compose.onNodeWithTag("send").performClick()
+        assertEquals(FormattedText("hi @carol_writer and Alice", listOf(TextEntity(21, 5, EntityType.MentionName(501)))), sent.single())
     }
 
     @Test

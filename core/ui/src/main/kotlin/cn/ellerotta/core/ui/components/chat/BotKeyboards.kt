@@ -203,7 +203,7 @@ internal fun KeyboardButton(button: BotButton, onClick: () -> Unit, modifier: Mo
     FilledTonalButton(
         onClick = onClick,
         enabled = enabled && button !is BotButton.Disabled,
-        shape = RoundedCornerShape(12.dp),
+        shape = MaterialTheme.shapes.medium,
         colors = colorsOf(button.style),
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
         modifier = modifier,
@@ -238,8 +238,8 @@ internal fun OpenLinkDialog(url: String, onOpen: () -> Unit, onDismiss: () -> Un
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.chat_open_link_title)) },
         text = { Text(url) },
-        confirmButton = { TextButton(onClick = onOpen, modifier = Modifier.testTag("openLink")) { Text(stringResource(R.string.chat_open_link)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+        confirmButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onOpen, modifier = Modifier.testTag("openLink")) { Text(stringResource(R.string.chat_open_link)) } },
+        dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
         modifier = Modifier.testTag("openLinkDialog"),
     )
 }
@@ -263,12 +263,12 @@ internal fun LoginDialog(request: LoginRequest, onAnswer: (accepted: Boolean?, w
             }
         },
         confirmButton = {
-            TextButton(onClick = { onAnswer(true, request.writeAccess && write, request.phone && phone) }, modifier = Modifier.testTag("loginAccept")) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = { onAnswer(true, request.writeAccess && write, request.phone && phone) }, modifier = Modifier.testTag("loginAccept")) {
                 Text(stringResource(R.string.chat_login_accept))
             }
         },
         dismissButton = {
-            TextButton(onClick = { onAnswer(false, false, false) }, modifier = Modifier.testTag("loginDecline")) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = { onAnswer(false, false, false) }, modifier = Modifier.testTag("loginDecline")) {
                 Text(stringResource(R.string.chat_login_decline))
             }
         },
@@ -281,7 +281,7 @@ internal fun BotAlert(text: String, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         text = { Text(text) },
-        confirmButton = { TextButton(onClick = onDismiss, modifier = Modifier.testTag("botAlertOk")) { Text(stringResource(R.string.common_ok)) } },
+        confirmButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onDismiss, modifier = Modifier.testTag("botAlertOk")) { Text(stringResource(R.string.common_ok)) } },
         modifier = Modifier.testTag("botAlert"),
     )
 }

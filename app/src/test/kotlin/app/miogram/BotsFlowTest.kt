@@ -96,8 +96,8 @@ class BotsFlowTest {
         compose.waitForTag("messageInput")
 
         compose.onNodeWithTag("messageInput").performTextInput("@g")
-        compose.waitForTag("inlineBot_gifbot")
-        compose.onNodeWithTag("inlineBot_gifbot").performClick()
+        compose.waitForTag("mention_u${FakeBots.GIF_BOT_ID}")
+        compose.onNodeWithTag("mention_u${FakeBots.GIF_BOT_ID}").performClick()
         compose.waitForTag("composerHint", unmerged = true)
 
         compose.onNodeWithTag("messageInput").performTextInput("kotlin")

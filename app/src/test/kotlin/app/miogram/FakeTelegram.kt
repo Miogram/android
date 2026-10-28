@@ -422,6 +422,8 @@ class FakeTelegram(password: String? = null) : AutoCloseable {
 
     val saveMusicCalls: MutableList<Pair<Long, Long?>> = java.util.concurrent.CopyOnWriteArrayList()
 
+    val resolvedNames: MutableList<String> = java.util.concurrent.CopyOnWriteArrayList()
+
     val bob = User(contact = true, id = 502, accessHash = 10, firstName = "Bob")
 
     @Volatile var carolIsSupport = false
@@ -1111,6 +1113,7 @@ class FakeTelegram(password: String? = null) : AutoCloseable {
             }
             server.rpc.on(ResolveUsername.CONSTRUCTOR_ID) { request ->
                 val username = ResolveUsername.decode(request).username.lowercase()
+                resolvedNames += username
                 bots.resolve(username)?.let { return@on FakeAnswer.Result(ResolvedPeer(PeerUser(it.id), emptyList(), listOf(it))) }
                 when (username) {
                     carol.username -> FakeAnswer.Result(ResolvedPeer(PeerUser(carol.id), emptyList(), listOf(carol)))
@@ -1344,7 +1347,10 @@ class FakeTelegram(password: String? = null) : AutoCloseable {
                 (call.media as? InputMediaDocument)?.let { media ->
                     val input = media.id as? InputDocument ?: return@on FakeAnswer.Error(400, "MEDIA_INVALID")
                     val document = (stickerDocuments() + gifDocuments()).firstOrNull { it.id == input.id && it.accessHash == input.accessHash } ?: return@on FakeAnswer.Error(400, "MEDIA_INVALID")
-                    if (!input.fileReference.contentEquals(stickerReference)) return@on FakeAnswer.Error(400, "FILE_REFERENCE_EXPIRED")
+                    if (!input.fileReference.contentEquals(stickerReference)) {
+                        sentRandomIds.remove(call.randomId)
+                        return@on FakeAnswer.Error(400, "FILE_REFERENCE_EXPIRED")
+                    }
                     return@on sent(sentId(call.peer), "", MessageMediaDocument(document = document))
                 }
                 val document = documentOfUpload(call.media, UPLOADED_ID + nextIdIn(call.peer)) ?: return@on FakeAnswer.Error(400, "MEDIA_INVALID")

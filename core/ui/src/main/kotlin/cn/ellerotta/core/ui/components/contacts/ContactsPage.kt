@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -287,11 +288,11 @@ fun AddContactDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onAdd(phone, firstName, lastName) }, enabled = valid, modifier = Modifier.testTag("confirmAddContact")) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = { onAdd(phone, firstName, lastName) }, enabled = valid, modifier = Modifier.testTag("confirmAddContact")) {
                 Text(stringResource(R.string.contacts_add_confirm))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+        dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }
 
@@ -327,10 +328,10 @@ fun AddProfileContactDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onAdd(firstName, lastName, sharePhone) }, enabled = firstName.isNotBlank(), modifier = Modifier.testTag("confirmAddContact")) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = { onAdd(firstName, lastName, sharePhone) }, enabled = firstName.isNotBlank(), modifier = Modifier.testTag("confirmAddContact")) {
                 Text(stringResource(R.string.contacts_add_confirm))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+        dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }

@@ -319,7 +319,7 @@ private fun TitleTag(text: String, modifier: Modifier = Modifier) {
         style = MaterialTheme.typography.labelSmall,
         color = color,
         maxLines = 1,
-        modifier = modifier.border(1.dp, color, RoundedCornerShape(4.dp)).padding(horizontal = 4.dp, vertical = 1.dp),
+        modifier = modifier.border(1.dp, color, MaterialTheme.shapes.extraSmall).padding(horizontal = 4.dp, vertical = 1.dp),
     )
 }
 

@@ -142,12 +142,26 @@ fun DialogComponent(
         },
         status = if (dialog.outgoing && dialog.typing == null && dialog.draft == null) {
             {
-                Icon(
-                    painterResource(if (dialog.read) R.drawable.ic_done_all else R.drawable.ic_check),
-                    stringResource(if (dialog.read) R.string.chats_read else R.string.chats_sent),
-                    Modifier.size(16.dp),
-                    tint = colors.primary,
-                )
+                when {
+                    dialog.sendFailed -> Icon(
+                        painterResource(R.drawable.ic_error),
+                        stringResource(R.string.chats_send_failed),
+                        Modifier.size(16.dp).testTag("sendFailed_${dialog.key}"),
+                        tint = colors.error,
+                    )
+                    dialog.sending -> Icon(
+                        painterResource(R.drawable.ic_schedule),
+                        stringResource(R.string.chats_sending),
+                        Modifier.size(16.dp).testTag("sending_${dialog.key}"),
+                        tint = colors.onSurfaceVariant,
+                    )
+                    else -> Icon(
+                        painterResource(if (dialog.read) R.drawable.ic_done_all else R.drawable.ic_check),
+                        stringResource(if (dialog.read) R.string.chats_read else R.string.chats_sent),
+                        Modifier.size(16.dp),
+                        tint = colors.primary,
+                    )
+                }
             }
         } else {
             null

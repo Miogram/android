@@ -41,6 +41,7 @@ internal fun TranslatedLine(id: Int, language: String, color: Color, onShowOrigi
                 colors = ButtonDefaults.textButtonColors(contentColor = color),
                 contentPadding = PaddingValues(horizontal = 6.dp),
                 modifier = Modifier.heightIn(min = 28.dp).testTag("showOriginal_$id"),
+                shapes = ButtonDefaults.shapes(),
             ) {
                 Text(stringResource(R.string.chat_show_original), style = MaterialTheme.typography.labelMedium)
             }

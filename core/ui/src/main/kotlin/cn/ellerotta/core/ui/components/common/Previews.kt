@@ -6,9 +6,12 @@ import android.graphics.Canvas
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Shader
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.tooling.preview.Preview
 import cn.ellerotta.core.ui.theme.MioTheme
 import java.io.ByteArrayOutputStream
@@ -21,10 +24,15 @@ import java.io.ByteArrayOutputStream
 @Preview(name = "320 dp", group = "320 dp", widthDp = 320)
 internal annotation class MioPreviews
 
+internal val LocalPreviewScheme = staticCompositionLocalOf<((dark: Boolean) -> ColorScheme)?> { null }
+
 @Composable
 internal fun PreviewTheme(content: @Composable () -> Unit) {
+    val override = LocalPreviewScheme.current
+    val dark = isSystemInDarkTheme()
     MioTheme(useDynamicColor = false) {
-        Surface(color = MaterialTheme.colorScheme.surface, content = content)
+        val surface = @Composable { Surface(color = MaterialTheme.colorScheme.surface, content = content) }
+        if (override == null) surface() else MaterialTheme(colorScheme = override(dark), content = surface)
     }
 }
 

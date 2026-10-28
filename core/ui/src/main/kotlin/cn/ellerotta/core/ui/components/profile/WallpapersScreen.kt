@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -130,7 +129,7 @@ fun WallpapersScreen(
 private fun PlainPreview(label: String) {
     val colors = MaterialTheme.colorScheme
     Box(
-        Modifier.fillMaxSize().background(colors.surface).border(1.dp, colors.outline, RoundedCornerShape(16.dp)).padding(8.dp),
+        Modifier.fillMaxSize().background(colors.surface).border(1.dp, colors.outline, MaterialTheme.shapes.large).padding(8.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(label, style = MaterialTheme.typography.labelLarge, color = colors.onSurfaceVariant, textAlign = TextAlign.Center)
@@ -149,7 +148,7 @@ private fun describe(wallpaper: Wallpaper): String = stringResource(
 
 @Composable
 private fun WallpaperTile(label: String, chosen: Boolean, dark: Boolean, tag: String, onClick: () -> Unit, content: @Composable () -> Unit) {
-    val shape = RoundedCornerShape(16.dp)
+    val shape = MaterialTheme.shapes.large
     Box(
         Modifier
             .aspectRatio(TILE_ASPECT)

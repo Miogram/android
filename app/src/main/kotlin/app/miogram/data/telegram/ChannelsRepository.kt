@@ -40,6 +40,7 @@ import cn.ellerotta.ktproto.api.types.Chat
 import cn.ellerotta.ktproto.api.types.InputUserSelf
 import cn.ellerotta.ktproto.api.types.PeerChannel
 import cn.ellerotta.ktproto.api.types.PeerChat
+import cn.ellerotta.ktproto.api.types.PeerUser
 import cn.ellerotta.ktproto.api.types.TypeChat
 import cn.ellerotta.ktproto.api.types.messages.Chats
 import cn.ellerotta.ktproto.api.types.messages.ChatsSlice
@@ -181,6 +182,23 @@ class ChannelsRepository @Inject constructor(private val telegram: TelegramClien
             },
             bot = user?.bot == true,
             self = id == self,
+            username = if (user != null) usernameOf(user) else registry.usernames[id],
+            firstName = if (user != null) user.firstName?.ifBlank { null } else registry.userNames[id],
+        )
+    }
+
+    fun knownUser(userKey: String, bot: Boolean = false): ChatMember? {
+        val id = (peerOfKey(userKey) as? PeerUser)?.userId ?: return null
+        val name = registry.peerNames[userKey] ?: return null
+        return ChatMember(
+            userKey = userKey,
+            name = name,
+            avatarKey = registry.peerAvatars[userKey],
+            presence = if (bot) Presence.Bot else Presence.Unknown,
+            bot = bot,
+            self = id == registry.selfId(),
+            username = registry.usernames[id],
+            firstName = registry.userNames[id],
         )
     }
 }

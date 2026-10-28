@@ -77,7 +77,7 @@ fun QRCodeScreen(url: String?, onBack: () -> Unit, onSwitchToPhone: () -> Unit, 
         }
         Spacer(Modifier.height(24.dp))
         Surface(
-            shape = MaterialTheme.shapes.extraLarge,
+            shape = MaterialTheme.shapes.extraLargeIncreased,
             color = Color.White,
             modifier = Modifier.size(260.dp),
         ) {

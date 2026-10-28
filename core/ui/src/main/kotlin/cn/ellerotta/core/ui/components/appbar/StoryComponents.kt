@@ -103,7 +103,7 @@ internal fun ExpandedStoryCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(MaterialTheme.shapes.large.copy(bottomStart = ZeroCornerSize, bottomEnd = ZeroCornerSize))
+                .clip(MaterialTheme.shapes.extraLarge.copy(bottomStart = ZeroCornerSize, bottomEnd = ZeroCornerSize))
                 .combinedClickable(
                     onClickLabel = stringResource(R.string.stories_ring_open),
                     onClick = onClick,
@@ -120,11 +120,11 @@ internal fun ExpandedStoryCard(
         ) {
             Surface(
                 modifier = cardModifier.size(width = STORY_CARD_WIDTH.dp, height = STORY_CARD_HEIGHT.dp),
-                shape = MaterialTheme.shapes.large,
+                shape = MaterialTheme.shapes.extraLarge,
                 border = if (unread && ringColor != null) BorderStroke(3.dp, ringColor) else null,
                 color = colors.surfaceContainerHigh,
             ) {
-                StoryPicture(peer, avatars, MaterialTheme.shapes.large, blur = 6.dp)
+                StoryPicture(peer, avatars, MaterialTheme.shapes.extraLarge, blur = 6.dp)
             }
             Text(
                 text = peer.name,

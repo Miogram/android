@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -233,6 +234,7 @@ fun CodeEntryScreen(
             },
             enabled = !busy,
             modifier = Modifier.testTag("wrongNumber"),
+            shapes = ButtonDefaults.shapes(),
         ) {
             Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.padding(start = 8.dp))
@@ -295,7 +297,7 @@ private fun DigitBox(char: String, isCursor: Boolean, state: CodeCellsState) {
             isCursor -> colors.primaryContainer
             else -> colors.surfaceContainerHigh
         },
-        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+        animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
         label = "digitBg",
     )
     val borderColor by animateColorAsState(
@@ -306,7 +308,7 @@ private fun DigitBox(char: String, isCursor: Boolean, state: CodeCellsState) {
             isFilled -> colors.outline
             else -> colors.outlineVariant
         },
-        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+        animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
         label = "digitBorder",
     )
     val borderWidth by animateDpAsState(
@@ -337,8 +339,8 @@ private fun DigitBox(char: String, isCursor: Boolean, state: CodeCellsState) {
                 scaleX = scaleAnim.value
                 scaleY = scaleAnim.value
             }
-            .border(width = borderWidth, color = borderColor, shape = MaterialTheme.shapes.medium),
-        shape = MaterialTheme.shapes.medium,
+            .border(width = borderWidth, color = borderColor, shape = MaterialTheme.shapes.large),
+        shape = MaterialTheme.shapes.large,
         color = backgroundColor,
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.clipToBounds()) {
@@ -376,7 +378,7 @@ private fun ResendLine(request: CodeRequest, busy: Boolean, onResend: () -> Unit
     }
     val next = request.nextType
     if (next == null) {
-        TextButton(onClick = onNoCode, modifier = Modifier.testTag("noCode")) { Text(stringResource(R.string.code_no_code_title)) }
+        TextButton(onClick = onNoCode, modifier = Modifier.testTag("noCode"), shapes = ButtonDefaults.shapes()) { Text(stringResource(R.string.code_no_code_title)) }
         return
     }
     val left = ((request.timeoutSeconds ?: 0) - (now - request.sentAtMillis) / 1000).coerceAtLeast(0)
@@ -390,7 +392,7 @@ private fun ResendLine(request: CodeRequest, busy: Boolean, onResend: () -> Unit
             modifier = Modifier.testTag("resendTimer"),
         )
     } else {
-        TextButton(onClick = onResend, enabled = !busy, modifier = Modifier.testTag("resend")) {
+        TextButton(onClick = onResend, enabled = !busy, modifier = Modifier.testTag("resend"), shapes = ButtonDefaults.shapes()) {
             Text(stringResource(if (viaCall) R.string.code_resend_call else R.string.code_resend_sms))
         }
     }

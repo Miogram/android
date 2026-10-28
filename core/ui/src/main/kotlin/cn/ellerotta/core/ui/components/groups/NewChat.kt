@@ -82,7 +82,7 @@ fun ChatPhotoButton(photo: ByteArray?, name: String, onPick: () -> Unit, onRemov
             }
         }
         if (onRemove != null) {
-            TextButton(onClick = onRemove, modifier = Modifier.heightIn(min = 48.dp).testTag("removePhoto")) { Text(stringResource(R.string.chat_photo_remove)) }
+            TextButton(onClick = onRemove, modifier = Modifier.heightIn(min = 48.dp).testTag("removePhoto"), shapes = ButtonDefaults.shapes()) { Text(stringResource(R.string.chat_photo_remove)) }
         }
     }
 }
@@ -334,7 +334,7 @@ fun MissingInviteesDialog(missing: List<MissingInvitee>, onSend: () -> Unit, onS
                 )
             }
         },
-        confirmButton = { TextButton(onClick = onSend, modifier = Modifier.testTag("sendInviteLink")) { Text(stringResource(R.string.missing_send)) } },
-        dismissButton = { TextButton(onClick = onSkip, modifier = Modifier.testTag("skipInviteLink")) { Text(stringResource(R.string.missing_skip)) } },
+        confirmButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onSend, modifier = Modifier.testTag("sendInviteLink")) { Text(stringResource(R.string.missing_send)) } },
+        dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onSkip, modifier = Modifier.testTag("skipInviteLink")) { Text(stringResource(R.string.missing_skip)) } },
     )
 }

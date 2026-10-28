@@ -26,6 +26,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LoadingIndicator
@@ -120,6 +121,7 @@ fun DataStorageScreen(state: DataStorageState, busy: Boolean, actions: DataStora
                                         TextButton(
                                             onClick = { clearing = category },
                                             enabled = bytes > 0,
+                                            shapes = ButtonDefaults.shapes(),
                                             modifier = Modifier.heightIn(min = 48.dp).testTag("clear_${category.name}"),
                                         ) { Text(stringResource(R.string.data_clear)) }
                                     }
@@ -251,11 +253,11 @@ private fun RuleDialog(network: NetworkType, rule: AutoDownloadRule, onSave: (Au
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSave(AutoDownloadRule(kinds.mapNotNull { name -> AutoDownloadKind.entries.firstOrNull { it.name == name } }.toSet(), limit)) }, modifier = Modifier.testTag("ruleSave")) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = { onSave(AutoDownloadRule(kinds.mapNotNull { name -> AutoDownloadKind.entries.firstOrNull { it.name == name } }.toSet(), limit)) }, modifier = Modifier.testTag("ruleSave")) {
                 Text(stringResource(R.string.data_save))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+        dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
         modifier = Modifier.testTag("ruleDialog"),
     )
 }
@@ -319,6 +321,6 @@ private fun StorageCategory.color(): Color = when (this) {
     StorageCategory.Media -> MaterialTheme.colorScheme.primary
     StorageCategory.Streams -> MaterialTheme.colorScheme.tertiary
     StorageCategory.Music -> MaterialTheme.colorScheme.secondary
-    StorageCategory.Stickers -> MaterialTheme.colorScheme.onPrimaryContainer
-    StorageCategory.Avatars -> MaterialTheme.colorScheme.onTertiaryContainer
+    StorageCategory.Stickers -> MaterialTheme.colorScheme.onSurfaceVariant
+    StorageCategory.Avatars -> MaterialTheme.colorScheme.onSecondaryContainer
 }

@@ -54,7 +54,7 @@ fun SignUpScreen(busy: Boolean, onBack: () -> Unit, onSignUp: (String, String) -
             onValueChange = { first = it.take(64) },
             label = { Text(stringResource(R.string.sign_up_first_name)) },
             singleLine = true,
-            shape = MaterialTheme.shapes.medium,
+            shape = MaterialTheme.shapes.large,
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next),
             modifier = Modifier.fillMaxWidth().testTag("firstName"),
         )
@@ -64,7 +64,7 @@ fun SignUpScreen(busy: Boolean, onBack: () -> Unit, onSignUp: (String, String) -
             onValueChange = { last = it.take(64) },
             label = { Text(stringResource(R.string.sign_up_last_name)) },
             singleLine = true,
-            shape = MaterialTheme.shapes.medium,
+            shape = MaterialTheme.shapes.large,
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { submit() }),
             modifier = Modifier.fillMaxWidth().testTag("lastName"),

@@ -1,11 +1,9 @@
 package cn.ellerotta.core.ui
 
 import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.expressiveLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.toArgb
 import cn.ellerotta.core.model.BotButtonStyle
 import cn.ellerotta.core.model.ForumTopic
 import cn.ellerotta.core.ui.components.chat.GIFT_CHIP_ALPHA
@@ -33,12 +31,12 @@ import cn.ellerotta.core.ui.theme.Lch
 import cn.ellerotta.core.ui.theme.TEXT_CONTRAST
 import cn.ellerotta.core.ui.theme.artworkScheme
 import cn.ellerotta.core.ui.theme.artworkSeed
+import cn.ellerotta.core.ui.theme.brandScheme
 import cn.ellerotta.core.ui.theme.contrastRatio
 import cn.ellerotta.core.ui.theme.fadedOver
 import cn.ellerotta.core.ui.theme.legibleOn
+import cn.ellerotta.core.ui.theme.lchOf
 import kotlin.math.abs
-import kotlin.math.cbrt
-import kotlin.math.pow
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -98,6 +96,23 @@ class ContrastTest {
     }
 
     @Test
+    fun theBrandSchemeIsANavyWithASlateSecondaryAndABlushTertiary() {
+        for (dark in listOf(false, true)) {
+            val brand = brandScheme(dark)
+            val primary = lchOf(brand.primary.toArgb())
+            val secondary = lchOf(brand.secondary.toArgb())
+            val tertiary = lchOf(brand.tertiary.toArgb())
+            assertTrue(primary.h in 280.0..300.0 && primary.c > 25, "primary $primary")
+            assertTrue(secondary.h in 265.0..295.0 && secondary.c in 8.0..20.0, "secondary $secondary")
+            assertTrue((tertiary.h + 20) % 360 in 5.0..40.0 && tertiary.c > 20, "tertiary $tertiary")
+            for (surface in listOf(brand.surface, brand.surfaceContainer, brand.surfaceContainerHighest)) {
+                val lch = lchOf(surface.toArgb())
+                assertTrue(lch.c < 6 && lch.h in 250.0..320.0, "surface $lch")
+            }
+        }
+    }
+
+    @Test
     fun bubblesKeepAaInEveryScheme() {
         for ((name, scheme) in schemes()) {
             for (out in listOf(true, false)) {
@@ -132,29 +147,33 @@ class ContrastTest {
     @Test
     fun chatsListKeepsAaInEveryScheme() {
         for ((name, scheme) in schemes()) {
-            text(name, "unread badge", scheme.onPrimary, scheme.primary)
+            text(name, "unread badge", scheme.onTertiary, scheme.tertiary)
             text(name, "muted unread badge", scheme.onSurfaceVariant, scheme.surfaceContainerHighest)
             text(name, "folder tab", scheme.onSurfaceVariant, scheme.surface)
             text(name, "selected folder tab on its pill", scheme.onSecondaryContainer, scheme.secondaryContainer)
             graphic(name, "online dot", legibleOn(scheme.surface, closeFriendsGreens), scheme.surface)
             text(name, "muted folder count on the pill", scheme.onSurfaceVariant, scheme.surfaceContainerHighest)
-            text(name, "unread folder count on the pill", scheme.onPrimary, scheme.primary)
+            text(name, "unread folder count on the pill", scheme.onTertiary, scheme.tertiary)
             text(name, "chat name", scheme.onSurface, scheme.surface)
             text(name, "chat preview", scheme.onSurfaceVariant, scheme.surface)
-            text(name, "chat time and mention mark", scheme.primary, scheme.surface)
+            text(name, "unread chat's time", scheme.primary, scheme.surface)
+            text(name, "read chat's time", scheme.onSurfaceVariant, scheme.surface)
+            text(name, "mention mark", scheme.tertiary, scheme.surface)
             graphic(name, "pin, checks and badges", scheme.primary, scheme.surface)
             graphic(name, "mute mark", scheme.onSurfaceVariant, scheme.surface)
             text(name, "pressed row's name", scheme.onSurface, scheme.surfaceContainerHighest)
             text(name, "pressed row's preview", scheme.onSurfaceVariant, scheme.surfaceContainerHighest)
             text(name, "pressed row's time", scheme.primary, scheme.surfaceContainerHighest)
+            text(name, "pressed row's mention mark", scheme.tertiary, scheme.surfaceContainerHighest)
             text(name, "selected row's name", scheme.onSurface, scheme.secondaryContainer)
             text(name, "selected row's preview", scheme.onSurfaceVariant, scheme.secondaryContainer)
             text(name, "selected row's time", scheme.primary, scheme.secondaryContainer)
+            text(name, "selected row's mention mark", scheme.tertiary, scheme.secondaryContainer)
             text(name, "app bar title", scheme.onSurface, scheme.surface)
             text(name, "search placeholder", scheme.onSurfaceVariant, scheme.surfaceContainerHighest)
             text(name, "search text", scheme.onSurface, scheme.surfaceContainerHighest)
             graphic(name, "toolbar's chosen item", scheme.onPrimaryContainer, scheme.primaryContainer)
-            graphic(name, "toolbar's other items", scheme.onSurfaceVariant, scheme.surface)
+            graphic(name, "toolbar's other items", scheme.onSurfaceVariant, scheme.surfaceContainer)
         }
     }
 
@@ -181,9 +200,9 @@ class ContrastTest {
             text(name, "header scam and fake tag", scheme.error, scheme.surfaceContainerLow)
             graphic(name, "header verified, premium and the activity's dots", scheme.primary, scheme.surfaceContainerLow)
             graphic(name, "header mute mark", scheme.onSurfaceVariant, scheme.surfaceContainerLow)
-            text(name, "back badge count", scheme.onPrimary, scheme.primary)
-            graphic(name, "back badge on its pill", scheme.primary, scheme.surfaceContainerLow)
-            graphic(name, "back badge over the scrim", scheme.primary, scheme.surface)
+            text(name, "back badge count", scheme.onTertiary, scheme.tertiary)
+            graphic(name, "back badge on its pill", scheme.tertiary, scheme.surfaceContainerLow)
+            graphic(name, "back badge over the scrim", scheme.tertiary, scheme.surface)
         }
     }
 
@@ -210,7 +229,14 @@ class ContrastTest {
         for ((name, scheme) in schemes()) {
             text(name, "bar title, own name and row titles", scheme.onSurface, scheme.surface)
             text(name, "section labels, number and row subtitles", scheme.onSurfaceVariant, scheme.surface)
-            graphic(name, "row icon", scheme.primary, scheme.surface)
+            text(name, "row titles on their card", scheme.onSurface, scheme.surfaceContainer)
+            text(name, "row subtitles on their card", scheme.onSurfaceVariant, scheme.surfaceContainer)
+            graphic(name, "row icon on its tile", scheme.onSecondaryContainer, scheme.secondaryContainer)
+            graphic(name, "storage rows' icons on their tile", scheme.primary, scheme.secondaryContainer)
+            graphic(name, "storage rows' icons on their tile", scheme.tertiary, scheme.secondaryContainer)
+            graphic(name, "storage rows' icons on their tile", scheme.secondary, scheme.secondaryContainer)
+            graphic(name, "storage rows' icons on their tile", scheme.onSurfaceVariant, scheme.secondaryContainer)
+            graphic(name, "storage rows' icons on their tile", scheme.onSecondaryContainer, scheme.secondaryContainer)
             graphic(name, "chevron", scheme.onSurfaceVariant, scheme.surface)
             graphic(name, "switch on, thumb", scheme.onPrimary, scheme.primary)
             graphic(name, "switch off, thumb", scheme.outline, scheme.surfaceContainerHighest)
@@ -224,23 +250,23 @@ class ContrastTest {
     @Test
     fun foldersKeepAaInEveryScheme() {
         for ((name, scheme) in schemes()) {
-            text(name, "folder names and switch labels", scheme.onSurface, scheme.surfaceContainerLow)
-            text(name, "folder names while dragged", scheme.onSurface, scheme.surfaceContainerHigh)
-            text(name, "folder summaries and descriptions", scheme.onSurfaceVariant, scheme.surfaceContainerLow)
+            text(name, "folder names and switch labels", scheme.onSurface, scheme.surfaceContainer)
+            text(name, "folder names while dragged", scheme.onSurface, scheme.surfaceContainerHighest)
+            text(name, "folder summaries and descriptions", scheme.onSurfaceVariant, scheme.surfaceContainer)
             text(name, "hint under the title, counts", scheme.onSurfaceVariant, scheme.surface)
             text(name, "section labels", scheme.primary, scheme.surface)
-            graphic(name, "reorder handle", scheme.onSurfaceVariant, scheme.surfaceContainerLow)
+            graphic(name, "reorder handle", scheme.onSurfaceVariant, scheme.surfaceContainer)
             graphic(name, "folder tile's icon", scheme.onSecondaryContainer, scheme.secondaryContainer)
             text(name, "add button, shared note", scheme.onSecondaryContainer, scheme.secondaryContainer)
             text(name, "limit message", scheme.onTertiaryContainer, scheme.tertiaryContainer)
             text(name, "type toggle on", scheme.onPrimary, scheme.primary)
             graphic(name, "chosen icon's ring", scheme.primary, scheme.surface)
-            graphic(name, "icon tiles", scheme.onSurface, scheme.surfaceContainerHigh)
+            graphic(name, "icon tiles", scheme.onSurface, scheme.surfaceContainerHighest)
             text(name, "delete folder", scheme.error, scheme.surface)
             text(name, "delete in the tab's menu", scheme.error, scheme.surfaceContainer)
             text(name, "menu items", scheme.onSurface, scheme.surfaceContainer)
             text(name, "chat kind in the picker", scheme.onSurfaceVariant, scheme.surface)
-            text(name, "delete confirmation", scheme.error, scheme.surfaceContainerHigh)
+            text(name, "delete confirmation", scheme.error, scheme.surfaceContainerHighest)
         }
     }
 
@@ -298,6 +324,7 @@ class ContrastTest {
         for ((name, scheme) in schemes()) {
             text(name, "glass pill on the plain background", Color.White, Color.Black.copy(alpha = PILL_ALPHA).compositeOver(scheme.surface))
             graphic(name, "media scrim on the plain background", Color.White, Color.Black.copy(alpha = MEDIA_SCRIM).compositeOver(scheme.surface))
+            text(name, "day and service chips on the theme's background", scheme.onSecondaryContainer, scheme.secondaryContainer)
             text(name, "no wallpaper tile's label", scheme.onSurfaceVariant, scheme.surface)
             graphic(name, "no wallpaper tile's outline", scheme.outline, scheme.surface)
         }
@@ -382,16 +409,16 @@ class ContrastTest {
     @Test
     fun sharedMediaKeepsAaInEveryScheme() {
         for ((name, scheme) in schemes()) {
-            text(name, "row title", scheme.onSurface, scheme.surfaceContainerLow)
-            text(name, "row subtitle and links", scheme.onSurfaceVariant, scheme.surfaceContainerLow)
+            text(name, "row title", scheme.onSurface, scheme.surfaceContainer)
+            text(name, "row subtitle and links", scheme.onSurfaceVariant, scheme.surfaceContainer)
             text(name, "month header", scheme.onSurfaceVariant, scheme.surface)
             graphic(name, "file and link tile icon", scheme.onPrimaryContainer, scheme.primaryContainer)
             text(name, "tab label", scheme.onSurface, scheme.surfaceContainerHigh)
             text(name, "chosen tab label", scheme.onPrimary, scheme.primary)
             graphic(name, "play and pause button", scheme.onPrimary, scheme.primary)
-            graphic(name, "waveform", scheme.onSurface, scheme.surfaceContainerLow)
-            graphic(name, "waveform, unplayed", scheme.onSurface.fadedOver(scheme.surfaceContainerLow, 0.38f, GRAPHIC_CONTRAST), scheme.surfaceContainerLow)
-            text(name, "menu's delete line", scheme.error, scheme.surfaceContainerLow)
+            graphic(name, "waveform", scheme.onSurface, scheme.surfaceContainer)
+            graphic(name, "waveform, unplayed", scheme.onSurface.fadedOver(scheme.surfaceContainer, 0.38f, GRAPHIC_CONTRAST), scheme.surfaceContainer)
+            text(name, "menu's delete line", scheme.error, scheme.surfaceContainer)
         }
         graphic("any", "play mark", Color.White, Color.Black.copy(alpha = MEDIA_SCRIM).compositeOver(Color.White))
     }
@@ -414,112 +441,11 @@ class ContrastTest {
     }
 
     private fun schemes(): List<Pair<String, ColorScheme>> = buildList {
-        add("expressive light" to expressiveLightColorScheme())
-        add("light" to lightColorScheme())
-        add("dark" to darkColorScheme())
-        for ((seedName, seed) in seeds) {
-            add("$seedName light" to dynamicScheme(seed, dark = false))
-            add("$seedName dark" to dynamicScheme(seed, dark = true))
-        }
-        add("monochrome light" to monochrome(dark = false))
-        add("monochrome dark" to monochrome(dark = true))
-    }
-
-    private val seeds = listOf(
-        "yellow" to Color(0xFFFFEB3B),
-        "cyan" to Color(0xFF00BCD4),
-        "red" to Color(0xFFF44336),
-        "green" to Color(0xFF4CAF50),
-        "magenta" to Color(0xFFE91E63),
-        "indigo" to Color(0xFF3F51B5),
-    )
-
-    private fun dynamicScheme(seed: Color, dark: Boolean): ColorScheme {
-        val primary = Palette(seed, 48f)
-        val secondary = Palette(seed, 16f)
-        val tertiary = Palette(seed, 24f, turn = 60f)
-        val neutral = Palette(seed, 8f)
-        return if (!dark) {
-            lightColorScheme(
-                primary = primary(40f), onPrimary = primary(100f), primaryContainer = primary(90f), onPrimaryContainer = primary(10f),
-                secondary = secondary(40f), onSecondary = secondary(100f), secondaryContainer = secondary(90f), onSecondaryContainer = secondary(10f),
-                tertiary = tertiary(40f), onTertiary = tertiary(100f), tertiaryContainer = tertiary(90f), onTertiaryContainer = tertiary(10f),
-                background = neutral(98f), onBackground = neutral(10f), surface = neutral(98f), onSurface = neutral(10f),
-                surfaceVariant = neutral(90f), onSurfaceVariant = neutral(30f), outline = neutral(50f), outlineVariant = neutral(80f),
-                surfaceContainer = neutral(94f), surfaceContainerHigh = neutral(92f), surfaceContainerHighest = neutral(90f),
-                surfaceContainerLow = neutral(96f), surfaceContainerLowest = neutral(100f),
-            )
-        } else {
-            darkColorScheme(
-                primary = primary(80f), onPrimary = primary(20f), primaryContainer = primary(30f), onPrimaryContainer = primary(90f),
-                secondary = secondary(80f), onSecondary = secondary(20f), secondaryContainer = secondary(30f), onSecondaryContainer = secondary(90f),
-                tertiary = tertiary(80f), onTertiary = tertiary(20f), tertiaryContainer = tertiary(30f), onTertiaryContainer = tertiary(90f),
-                background = neutral(6f), onBackground = neutral(90f), surface = neutral(6f), onSurface = neutral(90f),
-                surfaceVariant = neutral(30f), onSurfaceVariant = neutral(80f), outline = neutral(60f), outlineVariant = neutral(30f),
-                surfaceContainer = neutral(12f), surfaceContainerHigh = neutral(17f), surfaceContainerHighest = neutral(22f),
-                surfaceContainerLow = neutral(10f), surfaceContainerLowest = neutral(4f),
-            )
-        }
-    }
-
-    private fun monochrome(dark: Boolean): ColorScheme {
-        val grey = Palette(Color.Gray, 0f)
-        return dynamicScheme(Color.Gray, dark).copy(
-            primary = grey(if (dark) 100f else 0f),
-            onPrimary = grey(if (dark) 10f else 90f),
-            primaryContainer = grey(if (dark) 85f else 25f),
-            onPrimaryContainer = grey(if (dark) 0f else 100f),
-        )
-    }
-
-    private class Palette(seed: Color, private val chroma: Float, turn: Float = 0f) {
-        private val hue: Double
-
-        init {
-            val (_, a, b) = lab(seed)
-            hue = Math.atan2(b, a) + Math.toRadians(turn.toDouble())
-        }
-
-        operator fun invoke(tone: Float): Color {
-            var c = chroma.toDouble()
-            var rgb = srgb(tone.toDouble(), c * Math.cos(hue), c * Math.sin(hue))
-            while (c > 0.0 && rgb.any { it !in -0.0001..1.0001 }) {
-                c = (c - 0.5).coerceAtLeast(0.0)
-                rgb = srgb(tone.toDouble(), c * Math.cos(hue), c * Math.sin(hue))
-            }
-            return Color(rgb[0].toFloat().coerceIn(0f, 1f), rgb[1].toFloat().coerceIn(0f, 1f), rgb[2].toFloat().coerceIn(0f, 1f))
-        }
-    }
-
-    private companion object {
-        fun linear(c: Float): Double = if (c <= 0.04045f) c / 12.92 else ((c + 0.055) / 1.055).pow(2.4)
-
-        fun encode(c: Double): Double = if (c <= 0.0031308) 12.92 * c else 1.055 * c.pow(1 / 2.4) - 0.055
-
-        fun lab(color: Color): Triple<Double, Double, Double> {
-            val r = linear(color.red)
-            val g = linear(color.green)
-            val b = linear(color.blue)
-            val x = (0.4124 * r + 0.3576 * g + 0.1805 * b) / 0.95047
-            val y = 0.2126 * r + 0.7152 * g + 0.0722 * b
-            val z = (0.0193 * r + 0.1192 * g + 0.9505 * b) / 1.08883
-            fun f(t: Double) = if (t > 216.0 / 24389) cbrt(t) else (24389.0 / 27 * t + 16) / 116
-            return Triple(116 * f(y) - 16, 500 * (f(x) - f(y)), 200 * (f(y) - f(z)))
-        }
-
-        fun srgb(l: Double, a: Double, b: Double): List<Double> {
-            val fy = (l + 16) / 116
-            val fx = fy + a / 500
-            val fz = fy - b / 200
-            fun inverse(t: Double) = if (t * t * t > 216.0 / 24389) t * t * t else (116 * t - 16) / (24389.0 / 27)
-            val x = inverse(fx) * 0.95047
-            val y = inverse(fy)
-            val z = inverse(fz) * 1.08883
-            return listOf(
-                3.2406 * x - 1.5372 * y - 0.4986 * z,
-                -0.9689 * x + 1.8758 * y + 0.0415 * z,
-                0.0557 * x - 0.2040 * y + 1.0570 * z,
-            ).map { if (it < 0) it else encode(it) }
+        for (dark in listOf(false, true)) {
+            val side = if (dark) "dark" else "light"
+            add("brand $side" to brandScheme(dark))
+            for ((seedName, seed) in wallpaperSeeds) add("$seedName $side" to wallpaperScheme(seed, dark))
+            add("monochrome $side" to monochromeScheme(dark))
         }
     }
 }

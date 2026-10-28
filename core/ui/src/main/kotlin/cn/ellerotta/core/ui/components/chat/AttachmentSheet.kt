@@ -107,7 +107,7 @@ private fun AttachmentTile(item: AttachmentItem, hidden: Boolean, onRemove: () -
     val picture = remember(item.preview) { item.preview?.let(DecodedPhotos::get) }
     val remove = stringResource(R.string.chat_attachment_remove, item.name)
     Box(
-        Modifier.size(TILE).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh)
+        Modifier.size(TILE).clip(MaterialTheme.shapes.large).background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .semantics { contentDescription = item.name }.testTag("attachmentTile_${item.id}"),
     ) {
         if (picture != null) {

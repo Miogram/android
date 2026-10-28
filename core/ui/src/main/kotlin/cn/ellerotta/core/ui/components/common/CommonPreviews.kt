@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialShapes
@@ -41,7 +40,7 @@ internal fun AvatarPreview() {
             Avatar(CommonPreviewData.NAME, null, seed = CommonPreviewData.SEED)
             Avatar("Design team", null, size = 64, seed = 202)
             Avatar(CommonPreviewData.NAME, CommonPreviewData.photo)
-            Avatar(CommonPreviewData.NAME, CommonPreviewData.photo, size = 64, shape = RoundedCornerShape(16.dp))
+            Avatar(CommonPreviewData.NAME, CommonPreviewData.photo, size = 64, shape = MaterialTheme.shapes.large)
         }
     }
 }

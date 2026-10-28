@@ -163,7 +163,7 @@ internal fun AddStoryCard(
                     .fillMaxSize()
                     .semantics { contentDescription = if (hasActiveStory) myStoryLabel else addLabel }
                     .testTag("addStory"),
-                shape = MaterialTheme.shapes.large,
+                shape = MaterialTheme.shapes.extraLarge,
                 color = colors.surfaceContainerHigh,
                 border = BorderStroke(
                     width = if (hasActiveStory) 3.dp else 1.5.dp,
@@ -178,7 +178,7 @@ internal fun AddStoryCard(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxSize()
-                                .clip(MaterialTheme.shapes.large)
+                                .clip(MaterialTheme.shapes.extraLarge)
                                 .blur(6.dp),
                         )
                         hasActiveStory && photoBitmap != null -> Image(
@@ -187,7 +187,7 @@ internal fun AddStoryCard(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxSize()
-                                .clip(MaterialTheme.shapes.large),
+                                .clip(MaterialTheme.shapes.extraLarge),
                         )
                         !hasActiveStory -> Surface(
                             shape = CircleShape,

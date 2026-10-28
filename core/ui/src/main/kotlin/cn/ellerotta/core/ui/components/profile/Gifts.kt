@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -160,7 +159,7 @@ internal fun GiftCatalogueContent(gifts: List<CatalogueGift>?, stickers: Map<Str
         )
         LazyVerticalGrid(GridCells.Adaptive(104.dp), Modifier.padding(bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(gifts.orEmpty(), key = { it.id }) { gift ->
-                Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.testTag("catalogue_${gift.id}")) {
+                Surface(shape = MaterialTheme.shapes.largeIncreased, color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.testTag("catalogue_${gift.id}")) {
                     Column(Modifier.padding(8.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                         GiftSticker(gift.sticker, stickers, onLoadSticker, 64.dp)
                         Text(pluralStringResource(R.plurals.gift_stars, gift.stars.toInt(), gift.stars.toInt()), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)

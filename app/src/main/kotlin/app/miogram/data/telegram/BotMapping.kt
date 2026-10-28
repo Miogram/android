@@ -65,9 +65,8 @@ import cn.ellerotta.ktproto.api.types.ReplyKeyboardHide
 import cn.ellerotta.ktproto.api.types.ReplyKeyboardMarkup
 import cn.ellerotta.ktproto.api.types.messages.BotResults
 
-internal fun PeerRegistry.inlineBotOf(user: User): InlineBot? {
-    if (!user.bot) return null
-    val username = user.username ?: return null
+internal fun PeerRegistry.inlineBotOf(user: User, username: String? = usernameOf(user)): InlineBot? {
+    if (!user.bot || username == null) return null
     val placeholder = user.botInlinePlaceholder ?: return null
     val key = "u${user.id}"
     return InlineBot(key, username, nameOf(user), placeholder, avatarKey(avatarOf(key, user)))

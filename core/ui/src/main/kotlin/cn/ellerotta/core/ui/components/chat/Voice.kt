@@ -57,6 +57,7 @@ internal fun VoiceSpeedButton(speed: Float, onSpeed: () -> Unit, modifier: Modif
         colors = ButtonDefaults.textButtonColors(contentColor = color),
         contentPadding = PaddingValues(horizontal = 8.dp),
         modifier = modifier.semantics { contentDescription = label },
+        shapes = ButtonDefaults.shapes(),
     ) {
         Text(stringResource(R.string.music_speed, text), style = MaterialTheme.typography.labelLarge)
     }

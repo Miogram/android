@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -30,7 +31,7 @@ class PeerBarActions(val onReportSpam: () -> Unit, val onAddContact: () -> Unit,
 @Composable
 fun PeerActionBar(bar: PeerBar, actions: PeerBarActions, modifier: Modifier = Modifier) {
     Surface(
-        shape = MaterialTheme.shapes.extraLarge,
+        shape = MaterialTheme.shapes.extraLargeIncreased,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         tonalElevation = 4.dp,
         shadowElevation = 6.dp,
@@ -54,7 +55,7 @@ fun PeerActionBar(bar: PeerBar, actions: PeerBarActions, modifier: Modifier = Mo
 
 @Composable
 private fun BarButton(label: Int, tag: String, color: androidx.compose.ui.graphics.Color, onClick: () -> Unit) {
-    TextButton(onClick = onClick, modifier = Modifier.heightIn(min = 48.dp).testTag(tag)) {
+    TextButton(onClick = onClick, shapes = ButtonDefaults.shapes(), modifier = Modifier.heightIn(min = 48.dp).testTag(tag)) {
         Text(stringResource(label), color = color)
     }
 }

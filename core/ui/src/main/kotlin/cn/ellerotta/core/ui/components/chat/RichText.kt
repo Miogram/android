@@ -27,10 +27,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -571,7 +571,7 @@ internal fun QuoteBlock(collapsed: Boolean, accent: Color, content: @Composable 
     Column(
         Modifier
             .padding(vertical = 4.dp)
-            .clip(RoundedCornerShape(6.dp))
+            .clip(MaterialTheme.shapes.small)
             .background(accent.copy(alpha = 0.10f))
             .drawBehind { drawRect(accent, size = Size(3.dp.toPx(), size.height)) }
             .padding(start = 11.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
@@ -585,7 +585,7 @@ internal fun QuoteBlock(collapsed: Boolean, accent: Color, content: @Composable 
                 tint = accent,
                 modifier = Modifier
                     .align(Alignment.End)
-                    .clip(RoundedCornerShape(50))
+                    .clip(CircleShape)
                     .clickable { expanded = !expanded }
                     .rotate(if (expanded) 180f else 0f)
                     .testTag("quoteExpand"),
@@ -601,7 +601,7 @@ private fun PreBlock(text: String, language: String, onCopy: (String) -> Unit) {
         Modifier
             .padding(vertical = 4.dp)
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(MaterialTheme.shapes.small)
             .background(color.copy(alpha = 0.08f))
             .testTag("pre"),
     ) {
@@ -668,7 +668,7 @@ private fun DateEntityDialog(
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+        confirmButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }
 

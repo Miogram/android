@@ -59,6 +59,8 @@ data class ChatMember(
     val presence: Presence = Presence.Unknown,
     val bot: Boolean = false,
     val self: Boolean = false,
+    val username: String? = null,
+    val firstName: String? = null,
 )
 
 data class MembersPage(val members: List<ChatMember>, val total: Int)

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,14 +33,14 @@ fun InfoCard(modifier: Modifier = Modifier, title: String? = null, content: @Com
         if (title != null) {
             Text(title, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 16.dp, bottom = 8.dp, top = 8.dp))
         }
-        Surface(shape = RoundedCornerShape(28.dp), color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.fillMaxWidth()) {
+        Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
             Column(content = content)
         }
     }
 }
 
 @Composable
-fun InfoDivider(start: Dp = 72.dp) = HorizontalDivider(Modifier.padding(start = start, end = 16.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+fun InfoDivider(start: Dp = 72.dp) = HorizontalDivider(Modifier.padding(start = start, end = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
 
 val PlainInset = 16.dp
 
@@ -52,8 +51,8 @@ fun InfoRow(
     value: String,
     label: String? = null,
     modifier: Modifier = Modifier,
-    tint: Color = MaterialTheme.colorScheme.primary,
-    container: Color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+    tint: Color = MaterialTheme.colorScheme.onSecondaryContainer,
+    container: Color = MaterialTheme.colorScheme.secondaryContainer,
     valueColor: Color = MaterialTheme.colorScheme.onSurface,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
@@ -67,7 +66,7 @@ fun InfoRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (icon != null) {
-            Box(Modifier.size(40.dp).background(container, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(40.dp).background(container, MaterialTheme.shapes.medium), contentAlignment = Alignment.Center) {
                 Icon(painterResource(icon), null, Modifier.size(22.dp), tint = tint)
             }
             Spacer(Modifier.width(16.dp))

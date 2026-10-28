@@ -35,7 +35,7 @@ import kotlin.random.Random
 class AttachRepository @Inject constructor(private val telegram: TelegramClientHolder) {
     private val registry get() = telegram.peers
 
-    suspend fun sendPoll(dialogKey: String, draft: PollDraft, replyTo: Int? = null, topicId: Int? = null) {
+    suspend fun sendPoll(dialogKey: String, draft: PollDraft, replyTo: Int? = null, topicId: Int? = null): Long {
         val explanation = draft.explanation.trim().takeIf { draft.quiz && it.isNotEmpty() }
         val poll = Poll(
             id = 0,
@@ -52,10 +52,10 @@ class AttachRepository @Inject constructor(private val telegram: TelegramClientH
             solution = explanation,
             solutionEntities = explanation?.let { emptyList() },
         )
-        send(dialogKey, media, replyTo, topicId)
+        return send(dialogKey, media, replyTo, topicId)
     }
 
-    suspend fun sendPlace(dialogKey: String, place: GeoPlace, replyTo: Int? = null, topicId: Int? = null) {
+    suspend fun sendPlace(dialogKey: String, place: GeoPlace, replyTo: Int? = null, topicId: Int? = null): Long {
         val point = InputGeoPoint(place.latitude, place.longitude)
         val venue = place.venue
         val media = if (venue == null) {
@@ -63,12 +63,11 @@ class AttachRepository @Inject constructor(private val telegram: TelegramClientH
         } else {
             InputMediaVenue(point, place.title.orEmpty(), place.address.orEmpty(), venue.provider, venue.id, venue.type)
         }
-        send(dialogKey, media, replyTo, topicId)
+        return send(dialogKey, media, replyTo, topicId)
     }
 
-    suspend fun sendContact(dialogKey: String, card: ContactCard, replyTo: Int? = null, topicId: Int? = null) {
+    suspend fun sendContact(dialogKey: String, card: ContactCard, replyTo: Int? = null, topicId: Int? = null): Long =
         send(dialogKey, InputMediaContact(card.phone, card.firstName, card.lastName, card.vcard), replyTo, topicId)
-    }
 
     suspend fun startLive(dialogKey: String, place: GeoPlace, heading: Int?, seconds: Int, radius: Int?, replyTo: Int? = null, topicId: Int? = null): Int? {
         val randomId = Random.nextLong()
@@ -109,11 +108,7 @@ class AttachRepository @Inject constructor(private val telegram: TelegramClientH
         telegram.client().invoke(EditMessage(peer = registry.peer(dialogKey), id = id, media = media))
     }
 
-    private suspend fun send(dialogKey: String, media: TypeInputMedia, replyTo: Int?, topicId: Int?) {
-        telegram.client().invoke(
-            SendMedia(peer = registry.peer(dialogKey), replyTo = replyToOf(replyTo, topicId), media = media, message = "", randomId = Random.nextLong()),
-        )
-    }
+    private suspend fun send(dialogKey: String, media: TypeInputMedia, replyTo: Int?, topicId: Int?): Long = telegram.queue.media(dialogKey, media, replyTo, topicId)
 
     private fun headingOf(degrees: Int): Int = (((degrees % 360) + 360) % 360).let { if (it == 0) 360 else it }
 

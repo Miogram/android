@@ -9,11 +9,16 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import java.io.File
 
 @Database(
-    entities = [DialogRow::class, MessageRow::class, HistoryRow::class, PeerRow::class, FolderRow::class, MetaRow::class, ProfileRow::class, CustomEmojiRow::class, ContactRow::class, StoryRow::class],
-    version = 5,
+    entities = [
+        DialogRow::class, MessageRow::class, HistoryRow::class, PeerRow::class, FolderRow::class, MetaRow::class, ProfileRow::class, CustomEmojiRow::class, ContactRow::class, StoryRow::class,
+        OutgoingRow::class,
+    ],
+    version = 6,
 )
 abstract class ChatDatabase : RoomDatabase() {
     abstract fun chats(): ChatDao
+
+    abstract fun outgoing(): OutgoingDao
 
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -45,9 +50,20 @@ abstract class ChatDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `outgoing` (`id` INTEGER NOT NULL, `account` INTEGER NOT NULL, `dialog` TEXT NOT NULL, `topic` INTEGER NOT NULL, " +
+                        "`batch` INTEGER NOT NULL, `date` INTEGER NOT NULL, `request` BLOB NOT NULL, `shown` BLOB, `file` TEXT, `thumb` TEXT, `uploaded` INTEGER NOT NULL, " +
+                        "`media` BLOB, `failed` TEXT, PRIMARY KEY(`id`))",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_outgoing_account` ON `outgoing` (`account`)")
+            }
+        }
+
         fun open(context: Context, file: File): ChatDatabase =
             Room.databaseBuilder(context, ChatDatabase::class.java, file.path)
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
 

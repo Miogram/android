@@ -208,7 +208,7 @@ private fun ContextMenuSample(message: MessageItem, actions: List<MessageAction>
     Box(Modifier.fillMaxSize()) {
         ChatBackground(Modifier.fillMaxSize())
         Surface(
-            shape = RoundedCornerShape(18.dp),
+            shape = MaterialTheme.shapes.large,
             color = if (message.out) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
             modifier = Modifier
                 .align(if (message.out) Alignment.CenterEnd else Alignment.CenterStart)
@@ -566,7 +566,7 @@ internal fun SelectableRowPreview() {
                 SelectableRow(active = true, selected = selected, out = message.out, selectable = true, onToggle = {}, tag = "select_${message.id}") {
                     Box(Modifier.fillMaxWidth()) {
                         Surface(
-                            shape = RoundedCornerShape(18.dp),
+                            shape = MaterialTheme.shapes.large,
                             color = if (message.out) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
                             modifier = Modifier
                                 .align(if (message.out) Alignment.CenterEnd else Alignment.CenterStart)
@@ -632,8 +632,8 @@ internal fun ChatSearchResultsPreview() {
 
 @MioPreviews
 @Composable
-internal fun InlineBotListPreview() {
-    PreviewTheme { InlineBotList(Data.inlineBots, Data.avatars, onPick = {}) }
+internal fun MentionListPreview() {
+    PreviewTheme { MentionList(Data.mentions, Data.avatars, onPick = {}) }
 }
 
 @MioPreviews

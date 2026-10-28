@@ -15,7 +15,7 @@ import cn.ellerotta.core.model.FormattedText
 import cn.ellerotta.core.model.ForwardInfo
 import cn.ellerotta.core.model.ForwardPreview
 import cn.ellerotta.core.model.GifPanel
-import cn.ellerotta.core.model.InlineBot
+import cn.ellerotta.core.model.ChatMember
 import cn.ellerotta.core.model.InlineResult
 import cn.ellerotta.core.model.InlineResultKind
 import cn.ellerotta.core.model.InlineResults
@@ -233,9 +233,10 @@ internal object ChatChromePreviewData {
         total = 3,
     )
 
-    val inlineBots = listOf(
-        InlineBot(key = "u41", username = "gif", name = "GIF search", placeholder = "Search GIFs", avatarKey = "avatar_bot"),
-        InlineBot(key = "u42", username = "wiki", name = "Encyclopedia", placeholder = "Search articles"),
+    val mentions = listOf(
+        ChatMember("u12", "Mark Lee", avatarKey = "avatar_mark", username = "marklee", firstName = "Mark"),
+        ChatMember("u11", "Anna Petrova", avatarKey = "avatar_anna", firstName = "Anna"),
+        ChatMember("u41", "GIF search", avatarKey = "avatar_bot", bot = true, username = "gif", firstName = "GIF search"),
     )
 
     private fun thumb(key: String, start: Int, end: Int) =

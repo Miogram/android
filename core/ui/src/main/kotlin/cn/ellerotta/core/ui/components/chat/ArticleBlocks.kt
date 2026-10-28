@@ -266,7 +266,7 @@ internal fun ArticleBlockView(block: ArticleBlock, scope: ArticleScope) {
                 fontFamily = FontFamily.Monospace,
                 softWrap = false,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(MaterialTheme.shapes.small)
                     .background(scope.linkColor.copy(alpha = 0.12f))
                     .horizontalScroll(rememberScrollState())
                     .padding(horizontal = 10.dp, vertical = 6.dp)
@@ -326,7 +326,7 @@ private fun ArticlePre(block: ArticleBlock.Preformatted, scope: ArticleScope) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(MaterialTheme.shapes.small)
             .background(color.copy(alpha = 0.08f))
             .testTag("pre"),
     ) {
@@ -386,7 +386,7 @@ private fun ArticleDetails(block: ArticleBlock.Details, scope: ArticleScope) {
     val color = LocalContentColor.current
     Column(
         Modifier
-            .clip(RoundedCornerShape(10.dp))
+            .clip(MaterialTheme.shapes.medium)
             .background(color.copy(alpha = 0.06f))
             .testTag("details"),
     ) {
@@ -439,7 +439,7 @@ private fun UnsupportedBlock() {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(MaterialTheme.shapes.medium)
             .background(color.copy(alpha = 0.08f))
             .padding(start = 12.dp, end = 12.dp, top = 10.dp)
             .testTag("articleUnsupported"),
@@ -453,6 +453,7 @@ private fun UnsupportedBlock() {
             onClick = { runCatching { uri.openUri("market://details?id=${context.packageName}") } },
             colors = ButtonDefaults.textButtonColors(contentColor = bubbleColors().accent),
             modifier = Modifier.align(Alignment.End).testTag("articleUpdate"),
+            shapes = ButtonDefaults.shapes(),
         ) { Text(stringResource(R.string.chat_article_update)) }
     }
 }

@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -160,7 +160,7 @@ fun LocationViewScreen(state: LocationViewState, avatars: Map<String, ByteArray>
             }
             Surface(
                 color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+                shape = MaterialTheme.shapes.extraLarge.copy(bottomStart = CornerSize(0), bottomEnd = CornerSize(0)),
                 modifier = Modifier.fillMaxWidth().testTag("locationPanel"),
             ) {
                 Column(Modifier.windowInsetsPadding(WindowInsets.navigationBars).padding(top = 20.dp, bottom = 16.dp)) {

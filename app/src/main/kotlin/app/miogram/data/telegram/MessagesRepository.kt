@@ -85,6 +85,13 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
+import cn.ellerotta.core.model.MediaItem
+import cn.ellerotta.core.model.OutgoingLast
+import cn.ellerotta.core.model.OutgoingUploads
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -301,22 +308,46 @@ class MessagesRepository @Inject constructor(private val telegram: TelegramClien
         topicId: Int? = null,
         randomId: Long = Random.nextLong(),
         options: SendOptions = SendOptions.None,
-    ) {
-        val reply = replyToOf(replyTo, topicId)
-        val sent = registry.inputEntitiesOf(entities).ifEmpty { null }
-        sentOnce {
-            telegram.client().invoke(
-                SendMessage(silent = options.silent, clearDraft = true, peer = registry.peer(dialogKey), replyTo = reply, message = text, randomId = randomId, entities = sent, scheduleDate = options.scheduleDate),
-            )
-        }
+    ) = queue.await(queueText(dialogKey, text, replyTo, entities, topicId, randomId, options))
+
+    private val queue get() = telegram.queue
+
+    suspend fun queueText(
+        dialogKey: String,
+        text: String,
+        replyTo: Int? = null,
+        entities: List<TextEntity> = emptyList(),
+        topicId: Int? = null,
+        randomId: Long = Random.nextLong(),
+        options: SendOptions = SendOptions.None,
+    ): Long = queue.text(dialogKey, text, entities, replyTo, topicId, options, randomId)
+
+    suspend fun awaitOutgoing(batch: Long) = queue.await(batch)
+
+    fun outgoing(dialogKey: String, topicId: Int?): Flow<List<MessageItem>> = queue.shown(dialogKey, topicId)
+
+    val outgoingProgress: Flow<Map<String, DownloadState.Progress>> get() = queue.progress
+
+    val outgoingLast: Flow<Map<String, OutgoingLast>> get() = queue.last
+
+    val outgoingUploads: Flow<OutgoingUploads?> get() = queue.uploads
+
+    val outgoingSent: Flow<String> get() = queue.sent
+
+    val outgoingBusy: Flow<Boolean> get() = queue.busy
+
+    fun outgoingKeys(batch: Long, count: Int): List<String> = List(count) { OutgoingQueue.uploadKey(batch + it) }
+
+    suspend fun retryOutgoing(dialogKey: String, id: Int): Long? {
+        val batch = queue.batchOf(dialogKey, id) ?: return null
+        queue.retry(batch)
+        return batch
     }
 
-    private suspend fun sentOnce(send: suspend () -> Unit) {
-        try {
-            send()
-        } catch (e: RpcException) {
-            if (e.errorMessage != RANDOM_ID_DUPLICATE) throw e
-        }
+    suspend fun dropOutgoing(dialogKey: String, id: Int): Boolean {
+        val batch = queue.batchOf(dialogKey, id) ?: return false
+        queue.drop(batch)
+        return true
     }
 
     suspend fun saveDraft(dialogKey: String, draft: Draft) {
@@ -349,35 +380,20 @@ class MessagesRepository @Inject constructor(private val telegram: TelegramClien
         )
     }
 
-    suspend fun forward(fromKey: String, ids: List<Int>, toKey: String, dropAuthor: Boolean = false, dropCaptions: Boolean = false) {
-        telegram.client().invoke(
-            ForwardMessages(
-                dropAuthor = dropAuthor || dropCaptions,
-                dropMediaCaptions = dropCaptions,
-                fromPeer = registry.peer(fromKey),
-                id = ids.sorted(),
-                randomId = ids.map { Random.nextLong() },
-                toPeer = registry.peer(toKey),
-            ),
-        )
-    }
+    suspend fun forward(fromKey: String, ids: List<Int>, toKey: String, dropAuthor: Boolean = false, dropCaptions: Boolean = false) =
+        queue.await(queueForward(fromKey, ids, toKey, dropAuthor, dropCaptions))
 
-    suspend fun sendDocument(dialogKey: String, mediaKey: String, topicId: Int? = null, replyTo: Int? = null) {
-        val peer = registry.peer(dialogKey)
-        suspend fun send() = telegram.client().invoke(
-            SendMedia(peer = peer, replyTo = replyToOf(replyTo, topicId), media = InputMediaDocument(id = registry.inputDocuments[mediaKey] ?: error("unknown document $mediaKey")), message = "", randomId = Random.nextLong()),
-        )
-        try {
-            send()
-        } catch (e: RpcException) {
-            if (!e.errorMessage.startsWith("FILE_REFERENCE_") || !telegram.refreshReference(mediaKey)) throw e
-            send()
-        }
-    }
+    suspend fun queueForward(fromKey: String, ids: List<Int>, toKey: String, dropAuthor: Boolean = false, dropCaptions: Boolean = false, topicId: Int? = null): Long =
+        queue.forward(fromKey, ids, toKey, dropAuthor, dropCaptions, topicId)
 
-    suspend fun edit(dialogKey: String, id: Int, text: String, entities: List<TextEntity> = emptyList()) {
-        telegram.client().invoke(EditMessage(peer = registry.peer(dialogKey), id = id, message = text, entities = registry.inputEntitiesOf(entities)))
-    }
+    suspend fun sendDocument(dialogKey: String, media: MediaItem, topicId: Int? = null, replyTo: Int? = null) =
+        queue.await(queueDocument(dialogKey, media, topicId, replyTo))
+
+    suspend fun queueDocument(dialogKey: String, media: MediaItem, topicId: Int? = null, replyTo: Int? = null): Long = queue.document(dialogKey, media, replyTo, topicId)
+
+    suspend fun edit(dialogKey: String, id: Int, text: String, entities: List<TextEntity> = emptyList()) = queue.await(queueEdit(dialogKey, id, text, entities))
+
+    suspend fun queueEdit(dialogKey: String, id: Int, text: String, entities: List<TextEntity> = emptyList()): Long = queue.edit(dialogKey, id, text, entities)
 
     suspend fun delete(dialogKey: String, ids: List<Int>, revoke: Boolean) {
         if (peerOfKey(dialogKey) is PeerChannel) {
@@ -395,22 +411,17 @@ class MessagesRepository @Inject constructor(private val telegram: TelegramClien
         topicId: Int? = null,
         randomId: Long = Random.nextLong(),
         options: SendOptions = SendOptions.None,
-    ): Flow<DownloadState.Progress> = flow {
-        val current = telegram.client()
-        val file = uploadedFile(current, media.name, media.source) { emit(it) }
-        val thumb = thumbOf(current, media)
-        val sent = SendMedia(
-            silent = options.silent,
-            peer = registry.peer(dialogKey),
-            replyTo = replyToOf(replyTo, topicId),
-            media = inputMediaOf(media, file, thumb),
-            message = caption.text,
-            randomId = randomId,
-            entities = registry.inputEntitiesOf(caption.entities).ifEmpty { null },
-            scheduleDate = options.scheduleDate,
-        )
-        sentOnce { current.invoke(sent) }
-    }
+    ): Flow<DownloadState.Progress> = followed(1) { queueFile(dialogKey, media, caption, replyTo, topicId, randomId, options) }.map { it.progress }
+
+    suspend fun queueFile(
+        dialogKey: String,
+        media: OutgoingMedia,
+        caption: FormattedText = FormattedText(""),
+        replyTo: Int? = null,
+        topicId: Int? = null,
+        randomId: Long = Random.nextLong(),
+        options: SendOptions = SendOptions.None,
+    ): Long = queue.file(dialogKey, media, caption, replyTo, topicId, options, randomId)
 
     fun sendAlbum(
         dialogKey: String,
@@ -420,32 +431,22 @@ class MessagesRepository @Inject constructor(private val telegram: TelegramClien
         topicId: Int? = null,
         randomIds: List<Long> = items.map { Random.nextLong() },
         options: SendOptions = SendOptions.None,
-    ): Flow<AlbumProgress> = flow {
+    ): Flow<AlbumProgress> = followed(items.size) { queueAlbum(dialogKey, items, caption, replyTo, topicId, randomIds, options) }
+
+    suspend fun queueAlbum(
+        dialogKey: String,
+        items: List<OutgoingMedia>,
+        caption: FormattedText = FormattedText(""),
+        replyTo: Int? = null,
+        topicId: Int? = null,
+        randomIds: List<Long> = items.map { Random.nextLong() },
+        options: SendOptions = SendOptions.None,
+    ): Long {
         require(items.size in 2..AttachmentDraft.MAX_ITEMS && randomIds.size == items.size) { "an album has 2 to ${AttachmentDraft.MAX_ITEMS} items" }
-        val current = telegram.client()
-        val peer = registry.peer(dialogKey)
-        val entities = registry.inputEntitiesOf(caption.entities).ifEmpty { null }
-        val singles = items.mapIndexed { index, item ->
-            val file = uploadedFile(current, item.name, item.source) { emit(AlbumProgress(index, it)) }
-            val made = current.invoke(UploadMedia(peer = peer, media = inputMediaOf(item, file, thumbOf(current, item))))
-            val media = referencedMedia(made, item) ?: error("telegram made no media of ${item.name}")
-            InputSingleMedia(media = media, randomId = randomIds[index], message = if (index == 0) caption.text else "", entities = if (index == 0) entities else null)
-        }
-        val sent = SendMultiMedia(
-            silent = options.silent,
-            peer = peer,
-            replyTo = replyToOf(replyTo, topicId),
-            multiMedia = singles,
-            scheduleDate = options.scheduleDate,
-        )
-        sentOnce { current.invoke(sent) }
+        return queue.album(dialogKey, items, caption, replyTo, topicId, options, randomIds)
     }
 
-    fun uploadKindOf(mimeType: String, size: Long, asFile: Boolean = false): UploadKind = when {
-        mimeType in PHOTO_TYPES && !asFile && size <= MAX_PHOTO_SIZE -> UploadKind.Photo
-        mimeType.startsWith("video/") && !asFile -> UploadKind.Video
-        else -> UploadKind.File
-    }
+    fun uploadKindOf(mimeType: String, size: Long, asFile: Boolean = false): UploadKind = uploadKindOfFile(mimeType, size, asFile)
 
     fun sendVoice(
         dialogKey: String,
@@ -456,75 +457,31 @@ class MessagesRepository @Inject constructor(private val telegram: TelegramClien
         randomId: Long = Random.nextLong(),
         replyTo: Int? = null,
         options: SendOptions = SendOptions.None,
-    ): Flow<DownloadState.Progress> = flow {
-        val current = telegram.client()
-        val file = uploadedFile(current, "voice.ogg", UploadSource.of(recording)) { emit(it) }
-        val packed = waveform.takeIf { it.isNotEmpty() }?.let { encodeWaveform(it.toIntArray()) }
-        val audio = DocumentAttributeAudio(voice = true, duration = duration, waveform = packed)
-        val sent = SendMedia(
-            silent = options.silent,
-            peer = registry.peer(dialogKey),
-            replyTo = replyToOf(replyTo, topicId),
-            media = InputMediaUploadedDocument(file = file, mimeType = VOICE_TYPE, attributes = listOf(audio)),
-            message = "",
-            randomId = randomId,
-            scheduleDate = options.scheduleDate,
-        )
-        sentOnce { current.invoke(sent) }
-    }
+    ): Flow<DownloadState.Progress> = followed(1) { queueVoice(dialogKey, recording, duration, waveform, topicId, randomId, replyTo, options) }.map { it.progress }
 
-    private suspend fun uploadedFile(client: TelegramClient, name: String, source: UploadSource, onProgress: suspend (DownloadState.Progress) -> Unit): TypeInputFile {
-        var uploaded: TypeInputFile? = null
-        client.uploadFile(name, source).collect { step ->
-            when (step) {
-                is Upload.Progress -> onProgress(DownloadState.Progress(step.uploaded, step.total))
-                is Upload.Done -> uploaded = step.file
-            }
+    suspend fun queueVoice(
+        dialogKey: String,
+        recording: File,
+        duration: Int,
+        waveform: List<Int>,
+        topicId: Int? = null,
+        randomId: Long = Random.nextLong(),
+        replyTo: Int? = null,
+        options: SendOptions = SendOptions.None,
+    ): Long = queue.voice(dialogKey, recording, duration, waveform, replyTo, topicId, options, randomId)
+
+    private fun followed(count: Int, enqueue: suspend () -> Long): Flow<AlbumProgress> = channelFlow {
+        val batch = enqueue()
+        val keys = List(count) { OutgoingQueue.uploadKey(batch + it) }
+        val progress = launch {
+            queue.progress.collect { all -> keys.forEachIndexed { index, key -> all[key]?.let { send(AlbumProgress(index, it)) } } }
         }
-        return uploaded ?: error("the upload ended without a file")
-    }
-
-    private suspend fun thumbOf(client: TelegramClient, media: OutgoingMedia): TypeInputFile? {
-        val bytes = media.thumb?.takeIf { videoOf(media) } ?: return null
-        return uploadedFile(client, "thumb.jpg", UploadSource.of(bytes)) {}
-    }
-
-    private fun referencedMedia(made: TypeMessageMedia, item: OutgoingMedia): TypeInputMedia? {
-        val spoiler = spoilerOf(item)
-        return when (made) {
-            is MessageMediaPhoto -> (made.photo as? Photo)?.let { InputMediaPhoto(spoiler = spoiler, id = InputPhoto(it.id, it.accessHash, it.fileReference)) }
-            is MessageMediaDocument -> (made.document as? Document)?.let { InputMediaDocument(spoiler = spoiler, id = InputDocument(it.id, it.accessHash, it.fileReference)) }
-            else -> null
+        try {
+            queue.await(batch)
+        } finally {
+            progress.cancel()
         }
-    }
-
-    private fun inputMediaOf(media: OutgoingMedia, file: TypeInputFile, thumb: TypeInputFile?): TypeInputMedia {
-        if (uploadKindOf(media.mimeType, media.source.size, media.asFile) == UploadKind.Photo) return InputMediaUploadedPhoto(spoiler = spoilerOf(media), file = file)
-        val attributes = when {
-            media.asFile -> listOf(DocumentAttributeFilename(media.name))
-            videoOf(media) -> listOf(
-                DocumentAttributeVideo(supportsStreaming = true, duration = media.info.duration, w = media.info.width, h = media.info.height),
-                DocumentAttributeFilename(media.name),
-            )
-            media.mimeType.startsWith("audio/") -> listOf(
-                DocumentAttributeAudio(duration = media.info.duration.toInt(), title = media.info.title, performer = media.info.performer),
-                DocumentAttributeFilename(media.name),
-            )
-            else -> listOf(DocumentAttributeFilename(media.name))
-        }
-        return InputMediaUploadedDocument(forceFile = media.asFile, spoiler = spoilerOf(media), file = file, thumb = thumb, mimeType = media.mimeType, attributes = attributes)
-    }
-
-    private fun videoOf(media: OutgoingMedia) = media.mimeType.startsWith("video/") && !media.asFile
-
-    private fun spoilerOf(media: OutgoingMedia) = media.spoiler && !media.asFile && (media.mimeType in PHOTO_TYPES || media.mimeType.startsWith("video/"))
-
-    private companion object {
-        val PHOTO_TYPES = setOf("image/jpeg", "image/png", "image/webp")
-        const val MAX_PHOTO_SIZE = 10L * 1024 * 1024
-        const val VOICE_TYPE = "audio/ogg"
-        const val RANDOM_ID_DUPLICATE = "RANDOM_ID_DUPLICATE"
-    }
+    }.distinctUntilChanged()
 }
 
 internal fun replyToOf(replyTo: Int?, topicId: Int?): InputReplyToMessage? {
@@ -535,3 +492,33 @@ internal fun replyToOf(replyTo: Int?, topicId: Int?): InputReplyToMessage? {
         else -> null
     }
 }
+
+private val PHOTO_TYPES = setOf("image/jpeg", "image/png", "image/webp")
+private const val MAX_PHOTO_SIZE = 10L * 1024 * 1024
+
+internal fun uploadKindOfFile(mimeType: String, size: Long, asFile: Boolean): UploadKind = when {
+    mimeType in PHOTO_TYPES && !asFile && size <= MAX_PHOTO_SIZE -> UploadKind.Photo
+    mimeType.startsWith("video/") && !asFile -> UploadKind.Video
+    else -> UploadKind.File
+}
+
+internal fun inputMediaOf(media: OutgoingMedia, file: TypeInputFile): TypeInputMedia {
+    if (uploadKindOfFile(media.mimeType, media.source.size, media.asFile) == UploadKind.Photo) return InputMediaUploadedPhoto(spoiler = spoilerOf(media), file = file)
+    val attributes = when {
+        media.asFile -> listOf(DocumentAttributeFilename(media.name))
+        videoOf(media) -> listOf(
+            DocumentAttributeVideo(supportsStreaming = true, duration = media.info.duration, w = media.info.width, h = media.info.height),
+            DocumentAttributeFilename(media.name),
+        )
+        media.mimeType.startsWith("audio/") -> listOf(
+            DocumentAttributeAudio(duration = media.info.duration.toInt(), title = media.info.title, performer = media.info.performer),
+            DocumentAttributeFilename(media.name),
+        )
+        else -> listOf(DocumentAttributeFilename(media.name))
+    }
+    return InputMediaUploadedDocument(forceFile = media.asFile, spoiler = spoilerOf(media), file = file, mimeType = media.mimeType, attributes = attributes)
+}
+
+internal fun videoOf(media: OutgoingMedia) = media.mimeType.startsWith("video/") && !media.asFile
+
+private fun spoilerOf(media: OutgoingMedia) = media.spoiler && !media.asFile && (media.mimeType in PHOTO_TYPES || media.mimeType.startsWith("video/"))

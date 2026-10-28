@@ -1,6 +1,7 @@
 package cn.ellerotta.core.ui.components.auth
 
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,12 +34,12 @@ fun UserResolutionFailedDialog(
             )
         },
         confirmButton = {
-            TextButton(onClick = onRetry, modifier = Modifier.testTag("retryRestore")) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = onRetry, modifier = Modifier.testTag("retryRestore")) {
                 Text(stringResource(R.string.auth_try_again))
             }
         },
         dismissButton = {
-            TextButton(onClick = onCloseApp, modifier = Modifier.testTag("closeApp")) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = onCloseApp, modifier = Modifier.testTag("closeApp")) {
                 Text(stringResource(R.string.auth_close_app))
             }
         },

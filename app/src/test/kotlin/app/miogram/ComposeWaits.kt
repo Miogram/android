@@ -14,7 +14,7 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.semantics.getOrNull
 import org.robolectric.Shadows.shadowOf
 
 fun ComposeTestRule.waitUntilIdle(condition: () -> Boolean) = waitUntil(30_000) {
@@ -55,4 +55,4 @@ fun ComposeTestRule.openSavedMessages(selfId: Long) {
     onNodeWithTag("dialog_u$selfId").performClick()
 }
 
-fun editableText(text: String) = SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString(text))
+fun editableText(text: String) = SemanticsMatcher("editable text \"$text\"") { it.config.getOrNull(SemanticsProperties.EditableText)?.text == text }

@@ -37,6 +37,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumExtendedFloatingActionButton
 import androidx.compose.material3.OutlinedTextField
@@ -209,7 +210,7 @@ private fun Editor(
                     onValueChange = { onChange(folder.copy(title = it)) },
                     label = { Text(stringResource(R.string.folders_name)) },
                     singleLine = true,
-                    shape = RoundedCornerShape(16.dp),
+                    shape = MaterialTheme.shapes.large,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("folderName"),
                 )
             }
@@ -274,7 +275,7 @@ private fun Editor(
                 }
                 item(key = "leave_out") {
                     SectionLabel(stringResource(R.string.folders_leave_out), null, Modifier.padding(top = 8.dp))
-                    Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                    Surface(shape = MaterialTheme.shapes.largeIncreased, color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                         Column {
                             SwitchRow(stringResource(R.string.folders_exclude_muted), folder.excludeMuted, "exclude_muted") { onChange(folder.copy(excludeMuted = it)) }
                             SwitchRow(stringResource(R.string.folders_exclude_read), folder.excludeRead, "exclude_read") { onChange(folder.copy(excludeRead = it)) }
@@ -284,7 +285,7 @@ private fun Editor(
                 }
             } else {
                 item(key = "shared") {
-                    Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).testTag("folderShared")) {
+                    Surface(shape = MaterialTheme.shapes.largeIncreased, color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).testTag("folderShared")) {
                         Text(stringResource(R.string.folders_shared_note), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.padding(16.dp))
                     }
                 }
@@ -301,7 +302,7 @@ private fun Editor(
             }
             if (!state.isNew) {
                 item(key = "delete") {
-                    TextButton(onClick = askDelete, modifier = Modifier.padding(horizontal = 8.dp).heightIn(min = 48.dp).testTag("folderDelete")) {
+                    TextButton(onClick = askDelete, modifier = Modifier.padding(horizontal = 8.dp).heightIn(min = 48.dp).testTag("folderDelete"), shapes = ButtonDefaults.shapes()) {
                         Icon(painterResource(R.drawable.ic_delete), null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.error)
                         Text(stringResource(R.string.folders_delete), Modifier.padding(start = 8.dp), color = MaterialTheme.colorScheme.error)
                     }
@@ -327,7 +328,7 @@ private fun ChatsCard(
 ) {
     Column(modifier) {
         SectionLabel(heading, pluralStringResource(R.plurals.folders_chats_count, keys.size, keys.size))
-        Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("${tag}_card")) {
+        Surface(shape = MaterialTheme.shapes.largeIncreased, color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("${tag}_card")) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(hint, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (keys.isNotEmpty()) {
@@ -364,7 +365,7 @@ private fun TypeToggle(label: String, checked: Boolean, tag: String, onChange: (
         modifier = Modifier.heightIn(min = 48.dp).testTag(tag),
     ) {
         if (checked) Icon(painterResource(R.drawable.ic_check), null, Modifier.size(ToggleButtonDefaults.IconSize))
-        Text(label, Modifier.padding(start = if (checked) ToggleButtonDefaults.IconSpacing else 0.dp))
+        Text(label, Modifier.padding(start = if (checked) ToggleButtonDefaults.IconSpacing else 0.dp), style = if (checked) MaterialTheme.typography.labelLargeEmphasized else LocalTextStyle.current)
     }
 }
 

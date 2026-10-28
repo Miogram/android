@@ -70,7 +70,7 @@ fun ChatRemovalDialog(dialog: DialogItem, removal: ChatRemoval, onConfirm: (revo
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(revoke && dialog.revokable(removal)) }, modifier = Modifier.testTag("confirmRemoval")) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = { onConfirm(revoke && dialog.revokable(removal)) }, modifier = Modifier.testTag("confirmRemoval")) {
                 Text(
                     stringResource(
                         when {
@@ -83,7 +83,7 @@ fun ChatRemovalDialog(dialog: DialogItem, removal: ChatRemoval, onConfirm: (revo
                 )
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+        dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }
 
@@ -102,6 +102,7 @@ fun RemovalSnackbar(removal: PendingRemoval, onUndo: () -> Unit, modifier: Modif
                 onClick = onUndo,
                 colors = ButtonDefaults.textButtonColors(contentColor = SnackbarDefaults.actionColor),
                 modifier = Modifier.testTag("undoRemoval"),
+                shapes = ButtonDefaults.shapes(),
             ) { Text(stringResource(R.string.removal_undo)) }
         },
     ) { Text(text) }

@@ -42,9 +42,9 @@ internal fun LinkPreviewBlock(
     onOpen: () -> Unit = {},
 ) {
     Surface(
-        shape = RoundedCornerShape(12.dp),
+        shape = MaterialTheme.shapes.medium,
         color = accent.copy(alpha = 0.12f),
-        modifier = Modifier.padding(top = 6.dp, bottom = 2.dp).widthIn(max = 280.dp).clip(RoundedCornerShape(12.dp)).clickable(onClick = onOpen).testTag("link_${link.url}"),
+        modifier = Modifier.padding(top = 6.dp, bottom = 2.dp).widthIn(max = 280.dp).clip(MaterialTheme.shapes.medium).clickable(onClick = onOpen).testTag("link_${link.url}"),
     ) {
         Row(Modifier.height(IntrinsicSize.Min)) {
             Box(Modifier.width(4.dp).fillMaxHeight().clip(MioShapes.accentBar).background(accent))
@@ -57,7 +57,7 @@ internal fun LinkPreviewBlock(
                 val side = with(LocalDensity.current) { THUMB.roundToPx() }
                 val preview = remember(photo, side) { photo.preview(side) }
                 LaunchedEffect(preview?.key) { if (preview != null && downloads[preview.key] == null) onDownload(preview) }
-                Box(Modifier.padding(8.dp).size(THUMB).clip(RoundedCornerShape(8.dp)).align(Alignment.Top).testTag("linkPhoto")) {
+                Box(Modifier.padding(8.dp).size(THUMB).clip(MaterialTheme.shapes.small).align(Alignment.Top).testTag("linkPhoto")) {
                     StillImage(photo, preview?.let { downloads[it.key] })
                 }
             }

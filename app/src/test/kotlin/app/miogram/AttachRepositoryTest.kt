@@ -50,7 +50,7 @@ class AttachRepositoryTest {
             .addOption().withOption(2, "Noodles")
             .withAnonymous(false)
             .withMultiple(true)
-        repos.attach.sendPoll(saved, draft, replyTo = reply)
+        repos.messages.awaitOutgoing(repos.attach.sendPoll(saved, draft, replyTo = reply))
 
         val call = assertNotNull(fake.attach.sent.single())
         assertEquals(reply, assertIs<InputReplyToMessage>(call.replyTo).replyToMsgId)
@@ -79,7 +79,7 @@ class AttachRepositoryTest {
             .withQuiz(true)
             .withCorrect(2)
             .withExplanation(" basic arithmetic ")
-        repos.attach.sendPoll(saved, draft)
+        repos.messages.awaitOutgoing(repos.attach.sendPoll(saved, draft))
 
         val media = assertIs<InputMediaPoll>(fake.attach.sent.single().media)
         assertTrue(media.poll.quiz)
@@ -92,14 +92,14 @@ class AttachRepositoryTest {
     @Test
     fun aBroadcastChannelsPollAndAPrivateChatsPollStayAnonymous(): Unit = withChat { repos, fake, saved ->
         listOf(PeerKind.Channel, PeerKind.User, PeerKind.Saved).forEach { kind ->
-            repos.attach.sendPoll(saved, PollDraft(kind = kind, anonymous = false).withQuestion("q").withOption(0, "a").withOption(1, "b"))
+            repos.messages.awaitOutgoing(repos.attach.sendPoll(saved, PollDraft(kind = kind, anonymous = false).withQuestion("q").withOption(0, "a").withOption(1, "b")))
             assertFalse(assertIs<InputMediaPoll>(fake.attach.sent.last().media).poll.publicVoters, "$kind")
         }
     }
 
     @Test
     fun aPlaceGoesOutAsAGeoPoint(): Unit = withChat { repos, fake, saved ->
-        repos.attach.sendPlace(saved, GeoPlace(48.8566, 2.3522), topicId = null)
+        repos.messages.awaitOutgoing(repos.attach.sendPlace(saved, GeoPlace(48.8566, 2.3522), topicId = null))
         val media = assertIs<InputMediaGeoPoint>(fake.attach.sent.single().media)
         val point = assertIs<InputGeoPoint>(media.geoPoint)
         assertEquals(48.8566 to 2.3522, point.lat to point.long)
@@ -109,7 +109,7 @@ class AttachRepositoryTest {
     @Test
     fun aContactGoesOutWithItsNameSplitAndItsNumber(): Unit = withChat { repos, fake, saved ->
         val card = assertNotNull(ContactItem(key = "u7", userId = 7, name = "Ada King Lovelace", phone = "4479460000").card())
-        repos.attach.sendContact(saved, card)
+        repos.messages.awaitOutgoing(repos.attach.sendContact(saved, card))
         val media = assertIs<InputMediaContact>(fake.attach.sent.single().media)
         assertEquals(listOf("Ada King", "Lovelace", "+4479460000"), listOf(media.firstName, media.lastName, media.phoneNumber))
         assertEquals(ContactCard("Ada King", "Lovelace", "+4479460000"), repos.messages.history(saved).last().contact)

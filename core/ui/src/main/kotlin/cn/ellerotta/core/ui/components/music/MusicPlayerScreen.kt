@@ -48,6 +48,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconButtonShapes
 import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
@@ -721,7 +722,7 @@ private fun SleepButton(sleep: MusicSleep?, actions: MusicActions) {
                     menu = false
                     actions.onSleep(null)
                 },
-                text = { Text(stringResource(R.string.music_sleep_off)) },
+                text = { Text(stringResource(R.string.music_sleep_off), style = if (sleep == null) MaterialTheme.typography.labelLargeEmphasized else LocalTextStyle.current) },
                 shapes = MenuDefaults.itemShape(0, choices),
                 selectedLeadingIcon = { Icon(painterResource(R.drawable.ic_check), null) },
                 modifier = Modifier.testTag("sleepOff"),
@@ -744,7 +745,7 @@ private fun SleepButton(sleep: MusicSleep?, actions: MusicActions) {
                     menu = false
                     actions.onSleepAtEnd()
                 },
-                text = { Text(stringResource(R.string.music_sleep_end)) },
+                text = { Text(stringResource(R.string.music_sleep_end), style = if (sleep?.endOfTrack == true) MaterialTheme.typography.labelLargeEmphasized else LocalTextStyle.current) },
                 shapes = MenuDefaults.itemShape(choices - 1, choices),
                 selectedLeadingIcon = { Icon(painterResource(R.drawable.ic_check), null) },
                 modifier = Modifier.testTag("sleepAtEnd"),
@@ -857,7 +858,7 @@ internal fun OrderMenu(expanded: Boolean, order: MusicOrder, onDismiss: () -> Un
             SelectableDropdownMenuItem(
                 selected = each == order,
                 onClick = { onChoose(each) },
-                text = { Text(orderName(each)) },
+                text = { Text(orderName(each), style = if (each == order) MaterialTheme.typography.labelLargeEmphasized else LocalTextStyle.current) },
                 shapes = MenuDefaults.itemShape(index, MusicOrder.entries.size),
                 leadingIcon = { Icon(painterResource(orderIcon(each)), null) },
                 selectedLeadingIcon = { Icon(painterResource(R.drawable.ic_check), null) },

@@ -302,12 +302,12 @@ fun SettingsContent(
             title = { Text(stringResource(R.string.profile_log_out_title)) },
             text = { Text(stringResource(R.string.profile_log_out_text)) },
             confirmButton = {
-                TextButton(onClick = {
+                TextButton(shapes = ButtonDefaults.shapes(), onClick = {
                     confirmLogOut = false
                     actions.onLogOut()
                 }, modifier = Modifier.testTag("confirmLogOut")) { Text(stringResource(R.string.profile_log_out), color = MaterialTheme.colorScheme.error) }
             },
-            dismissButton = { TextButton(onClick = { confirmLogOut = false }) { Text(stringResource(R.string.common_cancel)) } },
+            dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = { confirmLogOut = false }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
     removing?.let { app ->
@@ -315,12 +315,12 @@ fun SettingsContent(
             onDismissRequest = { removing = null },
             text = { Text(stringResource(R.string.settings_app_remove_title, app.shortName)) },
             confirmButton = {
-                TextButton(onClick = {
+                TextButton(shapes = ButtonDefaults.shapes(), onClick = {
                     removing = null
                     actions.onRemoveApp(app)
                 }, modifier = Modifier.testTag("confirmRemoveApp")) { Text(stringResource(R.string.settings_app_remove), color = MaterialTheme.colorScheme.error) }
             },
-            dismissButton = { TextButton(onClick = { removing = null }) { Text(stringResource(R.string.common_cancel)) } },
+            dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = { removing = null }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
 }
@@ -373,7 +373,7 @@ private fun ProfileCard(me: ProfileInfo?, avatars: Map<String, ByteArray>, onOpe
 private fun SettingsCard(shape: Shape, first: Boolean = false, gap: Dp = StackGap, content: @Composable ColumnScope.() -> Unit) {
     Surface(
         shape = shape,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
@@ -416,10 +416,10 @@ private fun InfoLine(value: String, label: String, modifier: Modifier = Modifier
     )
 }
 
-private val TopShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
+private val TopShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
 private val MiddleShape = RoundedCornerShape(4.dp)
-private val BottomShape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 24.dp, bottomEnd = 24.dp)
-private val RoundedShape = RoundedCornerShape(24.dp)
+private val BottomShape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 20.dp, bottomEnd = 20.dp)
+private val RoundedShape = RoundedCornerShape(20.dp)
 
 private val StackGap = 4.dp
 private val GroupGap = 16.dp

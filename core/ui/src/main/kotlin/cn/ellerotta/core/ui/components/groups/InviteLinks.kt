@@ -96,7 +96,7 @@ fun InviteLinksScreen(
             links?.primary?.let { primary ->
                 item(key = "primary") {
                     InfoCard(title = stringResource(R.string.invite_primary)) {
-                        Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                        Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.extraLarge, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                             Text(
                                 primary.link.removePrefix("https://"),
                                 style = MaterialTheme.typography.bodyLarge,
@@ -113,7 +113,7 @@ fun InviteLinksScreen(
                             FilledTonalButton(onClick = { share(primary) }, contentPadding = pad, modifier = Modifier.weight(1f).testTag("sharePrimary"), shapes = ButtonDefaults.shapes()) {
                                 Text(stringResource(R.string.invite_share), maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }
-                            TextButton(onClick = { revoking = primary }, modifier = Modifier.testTag("revokePrimary")) {
+                            TextButton(onClick = { revoking = primary }, modifier = Modifier.testTag("revokePrimary"), shapes = ButtonDefaults.shapes()) {
                                 Text(stringResource(R.string.invite_revoke), color = MaterialTheme.colorScheme.error)
                             }
                         }
@@ -162,7 +162,7 @@ fun InviteLinksScreen(
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 container = MaterialTheme.colorScheme.surfaceContainerHigh,
                                 trailing = {
-                                    TextButton(onClick = { onDelete(link.link) }, modifier = Modifier.testTag("delete_${link.link}")) {
+                                    TextButton(onClick = { onDelete(link.link) }, modifier = Modifier.testTag("delete_${link.link}"), shapes = ButtonDefaults.shapes()) {
                                         Text(stringResource(R.string.invite_delete), color = MaterialTheme.colorScheme.error)
                                     }
                                 },
@@ -258,7 +258,7 @@ internal fun CreateInviteDialog(onCreate: (NewInviteLink) -> Unit, onDismiss: ()
                 Text(stringResource(R.string.invite_expiry), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     EXPIRIES.forEach { (seconds, label) ->
-                        FilterChip(selected = expiresIn == seconds, onClick = { expiresIn = seconds }, label = { Text(stringResource(label)) }, modifier = Modifier.testTag("expiry_${seconds ?: 0}"))
+                        FilterChip(selected = expiresIn == seconds, onClick = { expiresIn = seconds }, label = { Text(stringResource(label), style = if (expiresIn == seconds) MaterialTheme.typography.labelLargeEmphasized else MaterialTheme.typography.labelLarge) }, modifier = Modifier.testTag("expiry_${seconds ?: 0}"))
                     }
                 }
                 Row(
@@ -274,13 +274,13 @@ internal fun CreateInviteDialog(onCreate: (NewInviteLink) -> Unit, onDismiss: ()
                 }
                 Text(stringResource(R.string.invite_limit), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(selected = limit == null, enabled = !requestNeeded, onClick = { limit = null }, label = { Text(stringResource(R.string.invite_limit_none)) }, modifier = Modifier.testTag("limit_0"))
+                    FilterChip(selected = limit == null, enabled = !requestNeeded, onClick = { limit = null }, label = { Text(stringResource(R.string.invite_limit_none), style = if (limit == null) MaterialTheme.typography.labelLargeEmphasized else MaterialTheme.typography.labelLarge) }, modifier = Modifier.testTag("limit_0"))
                     LIMITS.forEach { count ->
                         FilterChip(
                             selected = limit == count,
                             enabled = !requestNeeded,
                             onClick = { limit = count },
-                            label = { Text(pluralStringResource(R.plurals.invite_limit_people, count, count)) },
+                            label = { Text(pluralStringResource(R.plurals.invite_limit_people, count, count), style = if (limit == count) MaterialTheme.typography.labelLargeEmphasized else MaterialTheme.typography.labelLarge) },
                             modifier = Modifier.testTag("limit_$count"),
                         )
                     }
@@ -290,10 +290,11 @@ internal fun CreateInviteDialog(onCreate: (NewInviteLink) -> Unit, onDismiss: ()
         },
         confirmButton = {
             TextButton(
+                shapes = ButtonDefaults.shapes(),
                 onClick = { onCreate(NewInviteLink(title, expiresIn, limit.takeIf { !requestNeeded }, requestNeeded)) },
                 modifier = Modifier.testTag("confirmCreate"),
             ) { Text(stringResource(R.string.invite_create_button)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+        dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }

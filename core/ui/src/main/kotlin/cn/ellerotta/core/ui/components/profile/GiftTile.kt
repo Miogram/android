@@ -169,7 +169,7 @@ private fun BoxScope.GiftRibbon(label: String, unique: UniqueGift) {
 
 @Composable
 internal fun GiftHeader(unique: UniqueGift?, stickers: Map<String, ByteArray>, onLoadSticker: (MediaItem) -> Unit, modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
-    Box(modifier.clip(RoundedCornerShape(28.dp)), contentAlignment = Alignment.Center) {
+    Box(modifier.clip(MaterialTheme.shapes.extraLarge), contentAlignment = Alignment.Center) {
         GiftBackdrop(unique, stickers, onLoadSticker, Modifier.matchParentSize())
         Box(Modifier.padding(16.dp), contentAlignment = Alignment.Center, content = content)
     }

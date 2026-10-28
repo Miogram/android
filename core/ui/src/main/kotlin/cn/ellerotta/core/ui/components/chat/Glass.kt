@@ -26,12 +26,18 @@ import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.dp
+import cn.ellerotta.core.model.ChatWallpaper
+import cn.ellerotta.core.model.WallpaperKind
 
 internal class ChatBackdrop(val layer: GraphicsLayer) {
     var origin by mutableStateOf(Offset.Zero)
 }
 
 internal val LocalChatBackdrop = staticCompositionLocalOf<ChatBackdrop?> { null }
+
+internal val LocalThemedBackground = staticCompositionLocalOf { false }
+
+internal fun ChatWallpaper?.isThemed(): Boolean = this == null || wallpaper.kind == WallpaperKind.Plain
 
 @Composable
 internal fun rememberChatBackdrop(): ChatBackdrop {

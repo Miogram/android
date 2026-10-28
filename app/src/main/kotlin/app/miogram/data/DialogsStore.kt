@@ -11,6 +11,7 @@ import cn.ellerotta.core.model.DialogItem
 import cn.ellerotta.core.model.Mutes
 import cn.ellerotta.core.model.NotifyScope
 import cn.ellerotta.core.model.Presence
+import cn.ellerotta.core.model.withOutgoing
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -107,7 +108,7 @@ class DialogsStore @Inject constructor(
 
     val state: StateFlow<DialogsState> = stateFlow.asStateFlow()
 
-    val decorated: StateFlow<DialogsState> = combine(stateFlow, typingFlow, onlineFlow, hiddenFlow) { state, typing, presence, hidden ->
+    val decorated: StateFlow<DialogsState> = combine(stateFlow, typingFlow, onlineFlow, hiddenFlow, repository.outgoingLast) { state, typing, presence, hidden, outgoing ->
         fun DialogItem.live(): DialogItem {
             val typers = typing[key].orEmpty()
             return copy(
@@ -116,7 +117,7 @@ class DialogsStore @Inject constructor(
                 typingMore = typers.drop(1).map { it.name },
                 online = presence[key]?.let { it == Presence.Online } ?: online,
                 presence = presence[key] ?: this.presence,
-            )
+            ).withOutgoing(outgoing[key])
         }
         fun List<DialogItem>.shown() = if (hidden.isEmpty()) this else filter { it.key !in hidden }
         state.copy(dialogs = state.dialogs.shown().map { it.live() }, archived = state.archived.shown().map { it.live() }, pulled = state.pulled.shown().map { it.live() })

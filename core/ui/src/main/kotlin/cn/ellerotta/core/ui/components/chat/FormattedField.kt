@@ -51,7 +51,7 @@ internal fun FormattedField(initial: FormattedText, onChange: (FormattedText) ->
                 }
             }
         }
-        Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.fillMaxWidth()) {
+        Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.fillMaxWidth()) {
             Box(Modifier.padding(horizontal = 16.dp, vertical = 12.dp).heightIn(min = 24.dp, max = FIELD_MAX), contentAlignment = Alignment.CenterStart) {
                 if (field.text.isEmpty()) Text(placeholder, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyLarge)
                 val colors = composerColors()

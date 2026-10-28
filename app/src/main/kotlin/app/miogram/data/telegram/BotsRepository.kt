@@ -92,7 +92,7 @@ class BotsRepository @Inject constructor(private val telegram: TelegramClientHol
         registry.rememberUsers(resolved.users)
         val id = (resolved.peer as? PeerUser)?.userId ?: return null
         val user = resolved.users.filterIsInstance<User>().firstOrNull { it.id == id } ?: return null
-        return registry.inlineBotOf(user)
+        return registry.inlineBotOf(user, username)
     }
 
     suspend fun inlineResults(bot: InlineBot, dialogKey: String, query: String, offset: String = ""): InlineResults {

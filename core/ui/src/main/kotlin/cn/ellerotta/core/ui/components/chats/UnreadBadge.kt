@@ -70,7 +70,7 @@ fun UnreadBadge(count: Int, muted: Boolean, modifier: Modifier = Modifier, text:
                     scaleY = pulse.value
                 }
                 .defaultMinSize(minWidth = 22.dp, minHeight = 22.dp)
-                .background(if (muted) colors.surfaceContainerHighest else colors.primary, CircleShape)
+                .background(if (muted) colors.surfaceContainerHighest else colors.tertiary, CircleShape)
                 .padding(horizontal = 6.dp),
             contentAlignment = Alignment.Center,
         ) {
@@ -85,7 +85,7 @@ fun UnreadBadge(count: Int, muted: Boolean, modifier: Modifier = Modifier, text:
             ) { shown ->
                 Text(
                     text ?: compactCount(shown),
-                    color = if (muted) colors.onSurfaceVariant else colors.onPrimary,
+                    color = if (muted) colors.onSurfaceVariant else colors.onTertiary,
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
                 )

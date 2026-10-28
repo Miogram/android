@@ -30,12 +30,19 @@ import cn.ellerotta.core.ui.components.chats.previewText
 @Composable
 fun CenterChip(text: String, modifier: Modifier = Modifier) {
     var lines by remember { mutableIntStateOf(1) }
+    val themed = LocalThemedBackground.current
+    val colors = MaterialTheme.colorScheme
     Box(modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
-        GlassPill(if (lines > 1) WrappedShape else CircleShape, Modifier.widthIn(max = CHIP_WIDTH)) {
+        GlassPill(
+            if (lines > 1) MaterialTheme.shapes.large else CircleShape,
+            Modifier.widthIn(max = CHIP_WIDTH),
+            backdrop = if (themed) null else LocalChatBackdrop.current,
+            fill = if (themed) colors.secondaryContainer else Color.Black.copy(alpha = PILL_ALPHA),
+        ) {
             Text(
                 text,
                 style = MaterialTheme.typography.labelLarge,
-                color = Color.White,
+                color = if (themed) colors.onSecondaryContainer else Color.White,
                 textAlign = TextAlign.Center,
                 onTextLayout = { lines = it.lineCount },
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
@@ -45,7 +52,6 @@ fun CenterChip(text: String, modifier: Modifier = Modifier) {
 }
 
 private val CHIP_WIDTH = 300.dp
-private val WrappedShape = RoundedCornerShape(16.dp)
 
 @Composable
 fun serviceText(message: MessageItem, kind: PeerKind): String {

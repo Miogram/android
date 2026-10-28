@@ -4,6 +4,7 @@ import android.app.Application
 import android.app.NotificationManager
 import androidx.lifecycle.ProcessLifecycleOwner
 import app.miogram.location.ProximityAlerts
+import app.miogram.outgoing.OutgoingKeeper
 import app.miogram.connection.ConnectionKeeper
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
@@ -18,11 +19,15 @@ class MiogramApp : Application() {
     @Inject
     lateinit var proximity: ProximityAlerts
 
+    @Inject
+    lateinit var outgoing: OutgoingKeeper
+
     override fun onCreate() {
         super.onCreate()
         startFirebase()
         connection.attach(ProcessLifecycleOwner.get().lifecycle)
         proximity.start()
+        outgoing.start()
         getSystemService(NotificationManager::class.java).deleteNotificationChannel(OLD_CONNECTION_CHANNEL)
     }
 

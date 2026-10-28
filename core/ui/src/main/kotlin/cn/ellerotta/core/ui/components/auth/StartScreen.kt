@@ -220,7 +220,7 @@ fun StartScreen(
                 }
             }
 
-            TextButton(onClick = onQrLogin, enabled = !busy, modifier = Modifier.padding(top = 12.dp).testTag("qrLogin")) {
+            TextButton(onClick = onQrLogin, enabled = !busy, modifier = Modifier.padding(top = 12.dp).testTag("qrLogin"), shapes = ButtonDefaults.shapes()) {
                 Icon(painterResource(R.drawable.ic_qr_code), null, Modifier.size(20.dp))
                 Text(stringResource(R.string.welcome_qr), modifier = Modifier.padding(start = 8.dp))
             }

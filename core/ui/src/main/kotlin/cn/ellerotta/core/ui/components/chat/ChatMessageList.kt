@@ -113,7 +113,8 @@ internal fun ChatMessageList(
     onOpenSender: ((MessageItem) -> Unit)? = null,
     wallpapers: ChatWallpaperActions? = null,
     onOpenPlace: ((MessageItem) -> Unit)? = null,
-) = CompositionLocalProvider(LocalChatBackdrop provides backdrop, LocalReactionArt provides reactionArt, LocalReactionEffects provides reactionEffects) {
+    themedBackground: Boolean = false,
+) = CompositionLocalProvider(LocalChatBackdrop provides backdrop, LocalThemedBackground provides themedBackground, LocalReactionArt provides reactionArt, LocalReactionEffects provides reactionEffects) {
     val spans = remember(rows) { runSpans(rows) }
     val days = remember(rows) { dayOfRows(rows) }
     Box(modifier) {

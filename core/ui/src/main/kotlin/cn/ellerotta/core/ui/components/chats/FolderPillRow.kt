@@ -55,7 +55,6 @@ internal fun FolderPillRow(
         Text(
             text = if (tab.folder.isAll) stringResource(R.string.chats_all) else tab.folder.title,
             style = label.style,
-            fontWeight = label.weight,
             color = label.color,
             maxLines = 1,
         )

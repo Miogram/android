@@ -136,16 +136,16 @@ class SentInListTest {
         moves(blogChat, { it.preview.text == "first comment here" }) { repos.messages.send(blogChat, "first comment here") }
 
         val sticker = repos.stickers.panel().recent.first()
-        moves(alice, { it.preview.media == MediaKind.Sticker }) { repos.messages.sendDocument(alice, sticker.key) }
+        moves(alice, { it.preview.media == MediaKind.Sticker }) { repos.messages.sendDocument(alice, sticker) }
         val archived = moves(bob, { it.preview.media == MediaKind.File }) { repos.messages.sendFile(bob, file("notes.bin", 1)).toList() }
         assertTrue(archived.archived)
         val recording = Files.createTempFile("voice", ".ogg").toFile().apply { writeBytes(Random(2).nextBytes(5_000)) }
         moves(alice, { it.preview.media == MediaKind.Voice }) { repos.messages.sendVoice(alice, recording, 2, listOf(1, 2, 3)).toList() }
         moves(devs, { it.preview.media == MediaKind.File }) { repos.messages.sendAlbum(devs, listOf(file("a.bin", 3), file("b.bin", 4)), FormattedText("two parts")).toList() }
 
-        moves(family, { it.preview.media == MediaKind.Poll }) { repos.attach.sendPoll(family, PollDraft().withQuestion("pizza?").withOption(0, "yes").withOption(1, "no")) }
-        moves(alice, { it.preview.media == MediaKind.Location }) { repos.attach.sendPlace(alice, GeoPlace(48.8566, 2.3522)) }
-        moves(alice, { it.preview.media == MediaKind.Contact }) { repos.attach.sendContact(alice, ContactCard("Ada", "Lovelace", "4479460000")) }
+        moves(family, { it.preview.media == MediaKind.Poll }) { repos.messages.awaitOutgoing(repos.attach.sendPoll(family, PollDraft().withQuestion("pizza?").withOption(0, "yes").withOption(1, "no"))) }
+        moves(alice, { it.preview.media == MediaKind.Location }) { repos.messages.awaitOutgoing(repos.attach.sendPlace(alice, GeoPlace(48.8566, 2.3522))) }
+        moves(alice, { it.preview.media == MediaKind.Contact }) { repos.messages.awaitOutgoing(repos.attach.sendContact(alice, ContactCard("Ada", "Lovelace", "4479460000"))) }
         moves(alice, { it.preview.media == MediaKind.Location }) { repos.attach.startLive(alice, GeoPlace(48.8566, 2.3522), heading = null, seconds = 900, radius = null) }
 
         moves(alice, { it.preview.text == "Kotlin is a modern language" }) { repos.bots.sendInlineResult(alice, FakeBots.FIRST_QUERY, "kotlin") }

@@ -28,7 +28,6 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -52,6 +51,7 @@ import cn.ellerotta.core.model.WallpaperEdit
 import cn.ellerotta.core.model.WallpaperKind
 import cn.ellerotta.core.ui.R
 import cn.ellerotta.core.ui.components.chat.WallpaperImage
+import cn.ellerotta.core.ui.components.common.CheckedSwitch
 import kotlin.math.roundToInt
 
 @Composable
@@ -144,6 +144,6 @@ private fun Swatch(color: Int, selected: Boolean, tag: String, label: String, on
 private fun Toggle(label: String, checked: Boolean, tag: String, onChange: (Boolean) -> Unit) {
     Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        Switch(checked, onCheckedChange = onChange, modifier = Modifier.testTag(tag))
+        CheckedSwitch(checked, onCheckedChange = onChange, modifier = Modifier.testTag(tag))
     }
 }

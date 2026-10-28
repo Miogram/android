@@ -23,6 +23,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.ModalBottomSheet
@@ -58,7 +59,6 @@ import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -194,7 +194,7 @@ private fun QueueHeader(state: MusicState, actions: MusicActions) {
                         ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        fontWeight = if (chosen) FontWeight.SemiBold else null,
+                        style = if (chosen) MaterialTheme.typography.labelLargeEmphasized else LocalTextStyle.current,
                         modifier = Modifier.clearAndSetSemantics {},
                     )
                 }
@@ -255,9 +255,8 @@ private fun QueueRow(
         Column(Modifier.weight(1f)) {
             Text(
                 track.heading(),
-                style = MaterialTheme.typography.bodyLarge,
+                style = if (current) MaterialTheme.typography.bodyLargeEmphasized else MaterialTheme.typography.bodyLarge,
                 color = content,
-                fontWeight = if (current) FontWeight.SemiBold else null,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )

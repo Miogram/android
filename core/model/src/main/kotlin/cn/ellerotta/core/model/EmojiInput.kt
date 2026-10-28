@@ -78,7 +78,7 @@ fun FormattedText.deletedBackwards(start: Int, end: Int): Pair<FormattedText, In
     return replaced(from, start, "") to from
 }
 
-private fun FormattedText.replaced(start: Int, end: Int, piece: String): FormattedText {
+internal fun FormattedText.replaced(start: Int, end: Int, piece: String): FormattedText {
     val newText = text.replaceRange(start, end, piece)
     val delta = piece.length - (end - start)
     val moved = entities.mapNotNull { entity ->

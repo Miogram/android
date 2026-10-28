@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -109,15 +110,15 @@ internal fun LinkDialog(initial: String, onConfirm: (String) -> Unit, onDismiss:
             )
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(linkUrl(url)) }, enabled = url.isNotBlank(), modifier = Modifier.testTag("confirmLink")) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = { onConfirm(linkUrl(url)) }, enabled = url.isNotBlank(), modifier = Modifier.testTag("confirmLink")) {
                 Text(stringResource(R.string.common_ok))
             }
         },
         dismissButton = {
             if (initial.isNotEmpty()) {
-                TextButton(onClick = { onConfirm("") }, modifier = Modifier.testTag("removeLink")) { Text(stringResource(R.string.chat_link_remove)) }
+                TextButton(shapes = ButtonDefaults.shapes(), onClick = { onConfirm("") }, modifier = Modifier.testTag("removeLink")) { Text(stringResource(R.string.chat_link_remove)) }
             } else {
-                TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
+                TextButton(shapes = ButtonDefaults.shapes(), onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
             }
         },
     )

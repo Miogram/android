@@ -17,12 +17,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -201,6 +201,7 @@ fun PhoneScreen(testMode: Boolean, busy: Boolean, onBack: () -> Unit, onSendCode
             },
             confirmButton = {
                 TextButton(
+                    shapes = ButtonDefaults.shapes(),
                     onClick = {
                         confirming = false
                         onSendCode(countryCode + nationalDigits)
@@ -209,7 +210,7 @@ fun PhoneScreen(testMode: Boolean, busy: Boolean, onBack: () -> Unit, onSendCode
                 ) { Text(stringResource(R.string.phone_confirm_continue)) }
             },
             dismissButton = {
-                TextButton(onClick = { confirming = false }, modifier = Modifier.testTag("editPhone")) { Text(stringResource(R.string.phone_confirm_edit)) }
+                TextButton(shapes = ButtonDefaults.shapes(), onClick = { confirming = false }, modifier = Modifier.testTag("editPhone")) { Text(stringResource(R.string.phone_confirm_edit)) }
             },
         )
     }
@@ -253,7 +254,7 @@ private fun PhoneCompositeField(
     )
 
     Surface(
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.surface,
         border = BorderStroke(2.dp, borderColor),
         modifier = modifier.height(56.dp),

@@ -147,7 +147,7 @@ class PeerProfileTest {
         var surface = 0
         compose.setContent {
             MioTheme(darkTheme = false, useDynamicColor = false) {
-                card = MaterialTheme.colorScheme.surfaceContainerLow.toArgb()
+                card = MaterialTheme.colorScheme.surfaceContainer.toArgb()
                 surface = MaterialTheme.colorScheme.surface.toArgb()
                 Screen(gifts = manyGifts, shared = photos)
             }

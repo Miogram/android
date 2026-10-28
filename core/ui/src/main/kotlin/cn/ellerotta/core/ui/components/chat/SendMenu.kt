@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
@@ -93,7 +93,7 @@ internal fun Modifier.sendMenuAction(label: String, onOpen: () -> Unit): Modifie
 @Composable
 internal fun SendMenu(expanded: Boolean, onDismiss: () -> Unit, whenOnline: Boolean, onSend: (SendOptions) -> Unit) {
     var scheduling by remember { mutableStateOf(false) }
-    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss, shape = RoundedCornerShape(20.dp)) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss, shape = MaterialTheme.shapes.largeIncreased) {
         SendMenuItems(whenOnline, onDismiss, onSchedule = { scheduling = true }, onSend)
     }
     if (scheduling) {
@@ -169,9 +169,9 @@ internal fun ScheduleDialog(
         DatePickerDialog(
             onDismissRequest = onDismiss,
             confirmButton = {
-                TextButton(onClick = { choosingTime = true }, enabled = dates.selectedDateMillis != null, modifier = Modifier.testTag("scheduleDateOk")) { Text(stringResource(R.string.chat_schedule_next)) }
+                TextButton(shapes = ButtonDefaults.shapes(), onClick = { choosingTime = true }, enabled = dates.selectedDateMillis != null, modifier = Modifier.testTag("scheduleDateOk")) { Text(stringResource(R.string.chat_schedule_next)) }
             },
-            dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+            dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
         ) {
             DatePicker(dates, title = { Text(stringResource(R.string.chat_send_schedule), Modifier.padding(start = 24.dp, top = 16.dp)) })
         }
@@ -188,9 +188,9 @@ internal fun ScheduleDialog(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { at?.let { onConfirm(it.toInt()) } }, enabled = ahead, modifier = Modifier.testTag("scheduleTimeOk")) { Text(stringResource(R.string.chat_schedule_set)) }
+                TextButton(shapes = ButtonDefaults.shapes(), onClick = { at?.let { onConfirm(it.toInt()) } }, enabled = ahead, modifier = Modifier.testTag("scheduleTimeOk")) { Text(stringResource(R.string.chat_schedule_set)) }
             },
-            dismissButton = { TextButton(onClick = { choosingTime = false }) { Text(stringResource(R.string.chat_schedule_back)) } },
+            dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = { choosingTime = false }) { Text(stringResource(R.string.chat_schedule_back)) } },
         )
     }
 }

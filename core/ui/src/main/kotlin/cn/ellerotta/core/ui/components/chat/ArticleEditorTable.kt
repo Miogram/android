@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -102,7 +103,7 @@ internal fun EditorTable(
         }
         val width = row.columns
         FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            TextButton(onClick = { onChange(row.copy(cells = row.cells + listOf(List(width) { FormattedText("") }))) }, modifier = Modifier.testTag("articleTableAddRow_${row.id}")) {
+            TextButton(onClick = { onChange(row.copy(cells = row.cells + listOf(List(width) { FormattedText("") }))) }, modifier = Modifier.testTag("articleTableAddRow_${row.id}"), shapes = ButtonDefaults.shapes()) {
                 Icon(painterResource(R.drawable.ic_add), null)
                 Spacer(Modifier.width(4.dp))
                 Text(stringResource(R.string.chat_article_table_add_row))
@@ -111,6 +112,7 @@ internal fun EditorTable(
                 onClick = { onChange(row.copy(cells = row.cells.map { it + FormattedText("") })) },
                 enabled = width < maxColumns,
                 modifier = Modifier.testTag("articleTableAddColumn_${row.id}"),
+                shapes = ButtonDefaults.shapes(),
             ) {
                 Icon(painterResource(R.drawable.ic_add), null)
                 Spacer(Modifier.width(4.dp))
@@ -121,6 +123,7 @@ internal fun EditorTable(
                 onClick = { onChange(row.copy(cells = row.cells.filterIndexed { index, _ -> index != line })) },
                 enabled = row.cells.size > 1,
                 modifier = Modifier.testTag("articleTableRemoveRow_${row.id}"),
+                shapes = ButtonDefaults.shapes(),
             ) {
                 Text(stringResource(R.string.chat_article_table_remove_row))
             }
@@ -129,25 +132,26 @@ internal fun EditorTable(
                 onClick = { onChange(row.copy(cells = row.cells.map { cells -> cells.filterIndexed { index, _ -> index != column } })) },
                 enabled = width > 1,
                 modifier = Modifier.testTag("articleTableRemoveColumn_${row.id}"),
+                shapes = ButtonDefaults.shapes(),
             ) {
                 Text(stringResource(R.string.chat_article_table_remove_column))
             }
             FilterChip(
                 selected = row.header,
                 onClick = { onChange(row.copy(header = !row.header)) },
-                label = { Text(stringResource(R.string.chat_article_table_header)) },
+                label = { Text(stringResource(R.string.chat_article_table_header), style = if (row.header) MaterialTheme.typography.labelLargeEmphasized else MaterialTheme.typography.labelLarge) },
                 modifier = Modifier.testTag("articleTableHeader_${row.id}"),
             )
             FilterChip(
                 selected = table.bordered,
                 onClick = { onChange(row.copy(block = table.copy(bordered = !table.bordered))) },
-                label = { Text(stringResource(R.string.chat_article_table_bordered)) },
+                label = { Text(stringResource(R.string.chat_article_table_bordered), style = if (table.bordered) MaterialTheme.typography.labelLargeEmphasized else MaterialTheme.typography.labelLarge) },
                 modifier = Modifier.testTag("articleTableBordered_${row.id}"),
             )
             FilterChip(
                 selected = table.striped,
                 onClick = { onChange(row.copy(block = table.copy(striped = !table.striped))) },
-                label = { Text(stringResource(R.string.chat_article_table_striped)) },
+                label = { Text(stringResource(R.string.chat_article_table_striped), style = if (table.striped) MaterialTheme.typography.labelLargeEmphasized else MaterialTheme.typography.labelLarge) },
                 modifier = Modifier.testTag("articleTableStriped_${row.id}"),
             )
         }

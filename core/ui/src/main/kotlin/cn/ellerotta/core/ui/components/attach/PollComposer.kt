@@ -18,6 +18,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -138,6 +139,7 @@ fun PollComposerScreen(
                         onClick = { onChange(draft.addOption()) },
                         enabled = draft.canAddOption,
                         modifier = Modifier.heightIn(min = 48.dp).testTag("pollAdd"),
+                        shapes = ButtonDefaults.shapes(),
                     ) {
                         Icon(painterResource(R.drawable.ic_add), null, Modifier.padding(end = 8.dp))
                         Text(stringResource(R.string.poll_add_option))

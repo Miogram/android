@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Text
@@ -61,11 +61,11 @@ fun DeleteMessageDialog(revokeLabel: String?, onConfirm: (revoke: Boolean) -> Un
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(revokeLabel != null && revoke) }, modifier = Modifier.testTag("confirmDelete")) {
+            TextButton(shapes = ButtonDefaults.shapes(), onClick = { onConfirm(revokeLabel != null && revoke) }, modifier = Modifier.testTag("confirmDelete")) {
                 Text(stringResource(R.string.chat_delete), color = MaterialTheme.colorScheme.error)
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+        dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }
 
@@ -82,7 +82,7 @@ internal fun ReplyQuote(
     Row(
         Modifier
             .padding(bottom = 4.dp)
-            .clip(QuoteShape)
+            .clip(MaterialTheme.shapes.small)
             .background(accent.copy(alpha = REPLY_TINT))
             .then(click)
             .height(IntrinsicSize.Min)
@@ -97,5 +97,3 @@ internal fun ReplyQuote(
 }
 
 internal const val REPLY_TINT = 0.08f
-
-private val QuoteShape = RoundedCornerShape(8.dp)

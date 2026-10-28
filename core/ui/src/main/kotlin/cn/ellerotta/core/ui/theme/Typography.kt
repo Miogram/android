@@ -26,21 +26,43 @@ private fun flex(weight: Int) = Font(
 
 val fontFamily = FontFamily(flex(400), flex(500), flex(600), flex(700), flex(800))
 
+private fun style(size: Int, line: Int, tracking: Float, weight: FontWeight) =
+    TextStyle(fontSize = size.sp, lineHeight = line.sp, letterSpacing = tracking.sp, fontWeight = weight)
+
+private val regular = FontWeight.Normal
+private val medium = FontWeight.Medium
+private val bold = FontWeight.Bold
+
 val Typography = Typography(
     fontFamily = fontFamily,
-    displayLarge = TextStyle(fontSize = 57.sp, lineHeight = 64.sp, fontWeight = FontWeight.Normal),
-    displayMedium = TextStyle(fontSize = 45.sp, lineHeight = 52.sp, fontWeight = FontWeight.Normal),
-    displaySmall = TextStyle(fontSize = 36.sp, lineHeight = 44.sp, fontWeight = FontWeight.Normal),
-    headlineLarge = TextStyle(fontSize = 32.sp, lineHeight = 40.sp, fontWeight = FontWeight.Normal),
-    headlineMedium = TextStyle(fontSize = 28.sp, lineHeight = 36.sp, fontWeight = FontWeight.Normal),
-    headlineSmall = TextStyle(fontSize = 24.sp, lineHeight = 32.sp, fontWeight = FontWeight.Normal),
-    titleLarge = TextStyle(fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold),
-    titleMedium = TextStyle(fontSize = 16.sp, lineHeight = 24.sp, fontWeight = FontWeight.Normal),
-    titleSmall = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
-    bodyLarge = TextStyle(fontSize = 16.sp, lineHeight = 24.sp, fontWeight = FontWeight.Normal),
-    bodyMedium = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Normal),
-    bodySmall = TextStyle(fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Normal),
-    labelLarge = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
-    labelMedium = TextStyle(fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium),
-    labelSmall = TextStyle(fontSize = 11.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium),
+    displayLarge = style(57, 64, -0.2f, regular),
+    displayMedium = style(45, 52, 0f, regular),
+    displaySmall = style(36, 44, 0f, regular),
+    headlineLarge = style(32, 40, 0f, regular),
+    headlineMedium = style(28, 36, 0f, regular),
+    headlineSmall = style(24, 32, 0f, regular),
+    titleLarge = style(22, 28, 0f, regular),
+    titleMedium = style(16, 24, 0.2f, medium),
+    titleSmall = style(14, 20, 0.1f, medium),
+    bodyLarge = style(16, 24, 0.5f, regular),
+    bodyMedium = style(14, 20, 0.2f, regular),
+    bodySmall = style(12, 16, 0.4f, regular),
+    labelLarge = style(14, 20, 0.1f, medium),
+    labelMedium = style(12, 16, 0.5f, medium),
+    labelSmall = style(11, 16, 0.5f, medium),
+    displayLargeEmphasized = style(57, 64, 0f, medium),
+    displayMediumEmphasized = style(45, 52, 0f, medium),
+    displaySmallEmphasized = style(36, 44, 0f, medium),
+    headlineLargeEmphasized = style(32, 40, 0f, medium),
+    headlineMediumEmphasized = style(28, 36, 0f, medium),
+    headlineSmallEmphasized = style(24, 32, 0f, medium),
+    titleLargeEmphasized = style(22, 28, 0f, medium),
+    titleMediumEmphasized = style(16, 24, 0.15f, bold),
+    titleSmallEmphasized = style(14, 20, 0.1f, bold),
+    bodyLargeEmphasized = style(16, 24, 0.15f, medium),
+    bodyMediumEmphasized = style(14, 20, 0.25f, medium),
+    bodySmallEmphasized = style(12, 16, 0.4f, medium),
+    labelLargeEmphasized = style(14, 20, 0.1f, bold),
+    labelMediumEmphasized = style(12, 16, 0.5f, bold),
+    labelSmallEmphasized = style(11, 16, 0.5f, bold),
 )

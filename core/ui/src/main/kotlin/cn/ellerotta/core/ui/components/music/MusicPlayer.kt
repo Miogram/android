@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -71,7 +70,7 @@ data class MusicActions(
 @Composable
 fun MusicCover(bytes: ByteArray?, modifier: Modifier = Modifier, voice: Boolean = false) {
     val bitmap = remember(bytes) { bytes?.let { BitmapFactory.decodeByteArray(it, 0, it.size)?.asImageBitmap() } }
-    Box(modifier.clip(if (voice) CircleShape else RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.tertiaryContainer), contentAlignment = Alignment.Center) {
+    Box(modifier.clip(if (voice) CircleShape else MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.tertiaryContainer), contentAlignment = Alignment.Center) {
         if (bitmap != null) {
             Image(bitmap, null, contentScale = ContentScale.Crop, modifier = Modifier.matchParentSize())
         } else {

@@ -13,12 +13,9 @@ class BotsTest {
         assertEquals(InlineQuery("gifbot", "funny cats\nand dogs"), inlineQueryOf("@gifbot funny cats\nand dogs"))
         assertNull(inlineQueryOf("@gifbot"))
         assertNull(inlineQueryOf("hi @gifbot cats"))
-        assertNull(inlineQueryOf("@gif cats"))
+        assertEquals(InlineQuery("gif", "cats"), inlineQueryOf("@gif cats"))
+        assertNull(inlineQueryOf("@gi cats"))
         assertNull(inlineQueryOf("@1gifbot cats"))
-        assertEquals("gi", inlineMention("@gi"))
-        assertEquals("", inlineMention("@"))
-        assertNull(inlineMention("@gi f"))
-        assertNull(inlineMention("gi"))
     }
 
     @Test

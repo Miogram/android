@@ -104,7 +104,7 @@ internal fun ReactionPicker(
     val row = if (more) state.allowed.take(slots - 1) else state.allowed
     val motion = MaterialTheme.motionScheme
     Surface(
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.surfaceContainerHighest,
         contentColor = MaterialTheme.colorScheme.onSurface,
         modifier = modifier

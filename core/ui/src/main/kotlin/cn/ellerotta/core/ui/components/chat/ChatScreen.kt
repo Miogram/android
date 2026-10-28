@@ -85,6 +85,9 @@ import cn.ellerotta.core.model.FormattedText
 import cn.ellerotta.core.model.PickedEmoji
 import cn.ellerotta.core.model.deletedBackwards
 import cn.ellerotta.core.model.withEmoji
+import cn.ellerotta.core.model.withMention
+import cn.ellerotta.core.model.mentionAt
+import cn.ellerotta.core.model.ChatMember
 import cn.ellerotta.core.model.TextEntity
 import cn.ellerotta.core.model.edited
 import cn.ellerotta.core.model.plainText
@@ -212,6 +215,7 @@ fun ChatScreen(
     onRemove: ((ChatRemoval, Boolean) -> Unit)? = null,
     inline: InlineState = InlineState(),
     inlineActions: ChatInlineActions? = null,
+    mentions: List<ChatMember> = emptyList(),
     botActions: ChatBotActions? = null,
     callbackAnswer: CallbackAnswer? = null,
     login: LoginState = LoginState(),
@@ -324,6 +328,9 @@ fun ChatScreen(
     val keyboard = LocalSoftwareKeyboardController.current
     LaunchedEffect(text) { stickerActions?.onDraft(text) }
     LaunchedEffect(text, editing) { inlineActions?.onText(if (editing == null) text else "") }
+    val typedMention = remember(text, field.selection) { if (inlineActions != null && field.selection.collapsed) mentionAt(text, field.selection.start) else null }
+    val mentionAtStart = typedMention?.start == 0 && editing == null
+    LaunchedEffect(typedMention?.query, mentionAtStart) { inlineActions?.onMention(typedMention?.query, mentionAtStart) }
     val commandTyped = editing == null && text.startsWith("/")
     LaunchedEffect(commandTyped) { if (commandTyped) onLoadCommands?.invoke() }
     BackHandler(enabled = panelOpen) { panelOpen = false }
@@ -590,6 +597,7 @@ fun ChatScreen(
             onOpenSender = onOpenSender?.takeIf { selection.isEmpty() },
             wallpapers = wallpaperActions,
             onOpenPlace = places?.onOpen,
+            themedBackground = wallpaper.isThemed(),
         )
         TopBarScrim(topScrimHeight(headerHeight), Modifier.align(Alignment.TopCenter))
         TopBarScrim(max(BottomScrimHeight, bottomHeight + TopBarTokens.ScrimOverhang), Modifier.align(Alignment.BottomCenter), stops = BOTTOM_SCRIM_STOPS)
@@ -731,12 +739,14 @@ fun ChatScreen(
                 }
                 val query = remember(text) { inlineQueryOf(text) }
                 val inlineBot = inline.bot?.takeIf { inlineActions != null && editing == null && query != null && it.username.equals(query.username, ignoreCase = true) }
-                AnimatedVisibility(
-                    inlineActions != null && editing == null && inlineBot == null && query == null && inline.bots.isNotEmpty(),
-                    enter = motion.expandFadeIn(),
-                    exit = motion.shrinkFadeOut(),
-                ) {
-                    InlineBotList(inline.bots, avatars) { bot -> setDraft(FormattedText("@${bot.username} ")) }
+                AnimatedVisibility(typedMention != null && inlineBot == null && mentions.isNotEmpty(), enter = motion.expandFadeIn(), exit = motion.shrinkFadeOut()) {
+                    MentionList(mentions, avatars) { member ->
+                        val at = typedMention ?: return@MentionList
+                        val (next, cursor) = FormattedText(field.text, entities).withMention(at, member)
+                        entities = next.entities
+                        field = TextFieldValue(next.text, TextRange(cursor))
+                        if (editing == null) onTyping(next.text)
+                    }
                 }
                 val results = inline.results?.takeIf { inlineBot != null && (it.results.isNotEmpty() || it.switchPm != null || it.switchWebView != null) }
                 AnimatedVisibility(results != null, enter = motion.expandFadeIn(), exit = motion.shrinkFadeOut()) {

@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -146,7 +145,7 @@ fun StoryComposer(
 private fun Frame(preview: ByteArray?, isVideo: Boolean, sending: Boolean, onPick: () -> Unit, current: MediaItem? = null, currentState: DownloadState? = null) {
     val bitmap = remember(preview) { preview?.let(DecodedPhotos::get) }
     Box(
-        Modifier.aspectRatio(9f / 16f).clip(RoundedCornerShape(16.dp)).background(FrameFill).testTag("storyPreview"),
+        Modifier.aspectRatio(9f / 16f).clip(MaterialTheme.shapes.large).background(FrameFill).testTag("storyPreview"),
         contentAlignment = Alignment.Center,
     ) {
         val label = stringResource(if (isVideo) R.string.stories_post_video else R.string.stories_post_photo)
@@ -188,7 +187,7 @@ private fun CaptionField(value: String, onValue: (String) -> Unit, enabled: Bool
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 48.dp)
-            .clip(MaterialTheme.shapes.large)
+            .clip(MaterialTheme.shapes.extraLarge)
             .background(FieldFill)
             .padding(horizontal = 16.dp, vertical = 12.dp)
             .semantics { contentDescription = hint }

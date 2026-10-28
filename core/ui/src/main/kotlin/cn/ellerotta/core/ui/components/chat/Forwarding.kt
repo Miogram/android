@@ -88,7 +88,7 @@ internal fun SelectionHeader(count: Int, onClose: () -> Unit, modifier: Modifier
 @Composable
 internal fun SelectionBar(count: Int, limited: Boolean, onForward: (() -> Unit)?, modifier: Modifier = Modifier, onReport: (() -> Unit)? = null) {
     Surface(
-        shape = MaterialTheme.shapes.extraLarge,
+        shape = MaterialTheme.shapes.extraLargeIncreased,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         tonalElevation = 4.dp,
         shadowElevation = 6.dp,
@@ -199,7 +199,7 @@ internal fun ForwardPicker(
                 Column(
                     Modifier
                         .width(FORWARD_ITEM_WIDTH)
-                        .clip(MaterialTheme.shapes.medium)
+                        .clip(MaterialTheme.shapes.large)
                         .clickable { onPick(dialog, dropAuthor || dropCaptions, dropCaptions) }
                         .padding(vertical = 4.dp)
                         .testTag("forwardTo_${dialog.key}"),

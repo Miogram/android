@@ -180,7 +180,7 @@ internal class PeerRegistry(
             userNames[user.id] = user.firstName?.ifBlank { null } ?: nameOf(user)
             val key = "u${user.id}"
             peerNames[key] = nameOf(user)
-            user.username?.let { usernames[user.id] = it }
+            usernameOf(user)?.let { usernames[user.id] = it }
             avatarKey(avatarOf(key, user))?.let { peerAvatars[key] = it }
             if (!user.min) {
                 rememberStoriesHidden(key, user.storiesHidden)
@@ -229,6 +229,8 @@ internal class PeerRegistry(
 
 internal fun avatarOf(peerKey: String, user: User): AvatarRef? =
     (user.photo as? UserProfilePhoto)?.let { AvatarRef(peerKey, it.photoId, it.dcId) }
+
+internal fun usernameOf(user: User): String? = user.username ?: user.usernames?.firstOrNull { it.active }?.username
 
 internal fun photoRef(peerKey: String, photo: TypeChatPhoto): AvatarRef? =
     (photo as? ChatPhoto)?.let { AvatarRef(peerKey, it.photoId, it.dcId) }

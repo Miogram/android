@@ -123,7 +123,7 @@ internal fun ArticleMap(block: ArticleBlock.Map, scope: ArticleScope) {
         Row(
             Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
+                .clip(MaterialTheme.shapes.medium)
                 .background(color.copy(alpha = 0.08f))
                 .clickable { runCatching { uri.openUri("geo:${block.latitude},${block.longitude}?z=${block.zoom}") } }
                 .padding(10.dp)
@@ -131,7 +131,7 @@ internal fun ArticleMap(block: ArticleBlock.Map, scope: ArticleScope) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Surface(shape = RoundedCornerShape(12.dp), color = bubbleColors().accent, modifier = Modifier.size(40.dp)) {
+            Surface(shape = MaterialTheme.shapes.medium, color = bubbleColors().accent, modifier = Modifier.size(40.dp)) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(painterResource(R.drawable.ic_location_on), null, tint = bubbleColors().onAccent)
                 }

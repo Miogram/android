@@ -95,7 +95,7 @@ internal class ChatMedia(
         return (done ?: error("download of ${media.key} ended without a file")) to fetched
     }
 
-    fun progress(key: String, progress: DownloadState.Progress) = downloadsState.update { it + (key to progress) }
+    fun uploads(uploads: Map<String, DownloadState.Progress>) = downloadsState.update { all -> all.filterKeys { it !in uploaded } + uploads }.also { uploaded = uploads.keys }
 
-    fun finished(key: String) = downloadsState.update { it - key }
+    private var uploaded: Set<String> = emptySet()
 }

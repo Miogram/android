@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -119,7 +118,7 @@ fun SessionsScreen(sessions: List<SessionInfo>?, busy: Boolean, onBack: () -> Un
             onDismissRequest = { details = null },
             icon = {
                 val (icon, color) = deviceLook(session)
-                Box(Modifier.size(64.dp).background(color, RoundedCornerShape(20.dp)), contentAlignment = Alignment.Center) {
+                Box(Modifier.size(64.dp).background(color, MaterialTheme.shapes.largeIncreased), contentAlignment = Alignment.Center) {
                     Icon(painterResource(icon), null, Modifier.size(36.dp), tint = Color.White)
                 }
             },
@@ -134,13 +133,13 @@ fun SessionsScreen(sessions: List<SessionInfo>?, busy: Boolean, onBack: () -> Un
             },
             confirmButton = {
                 if (!session.current) {
-                    TextButton(onClick = {
+                    TextButton(shapes = ButtonDefaults.shapes(), onClick = {
                         details = null
                         onTerminate(session)
                     }, modifier = Modifier.testTag("terminate")) { Text(stringResource(R.string.sessions_terminate), color = MaterialTheme.colorScheme.error) }
                 }
             },
-            dismissButton = { TextButton(onClick = { details = null }) { Text(stringResource(R.string.common_cancel)) } },
+            dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = { details = null }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
     if (confirmAll) {
@@ -149,12 +148,12 @@ fun SessionsScreen(sessions: List<SessionInfo>?, busy: Boolean, onBack: () -> Un
             title = { Text(stringResource(R.string.sessions_terminate_others)) },
             text = { Text(stringResource(R.string.sessions_terminate_others_text)) },
             confirmButton = {
-                TextButton(onClick = {
+                TextButton(shapes = ButtonDefaults.shapes(), onClick = {
                     confirmAll = false
                     onTerminateOthers()
                 }, modifier = Modifier.testTag("confirmTerminateOthers")) { Text(stringResource(R.string.sessions_terminate), color = MaterialTheme.colorScheme.error) }
             },
-            dismissButton = { TextButton(onClick = { confirmAll = false }) { Text(stringResource(R.string.common_cancel)) } },
+            dismissButton = { TextButton(shapes = ButtonDefaults.shapes(), onClick = { confirmAll = false }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
 }

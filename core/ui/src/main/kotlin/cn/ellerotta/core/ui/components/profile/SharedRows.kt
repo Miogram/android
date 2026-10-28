@@ -104,7 +104,7 @@ private fun RowShell(
     content: @Composable () -> Unit,
 ) {
     val haptics = LocalHapticFeedback.current
-    Surface(shape = shape, color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 1.dp)) {
+    Surface(shape = shape, color = MaterialTheme.colorScheme.surfaceContainer, modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 1.dp)) {
         Box(
             Modifier
                 .combinedClickable(
@@ -147,7 +147,7 @@ internal fun FileRow(message: MessageItem, shape: RoundedCornerShape, context: S
     val size = media.size?.let { Formatter.formatShortFileSize(LocalContext.current, it) }
     RowShell(shape, onOpen, { context.onMenu(message) }, Modifier.testTag("sharedFile_${message.id}")) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Box(Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(48.dp).clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
                 Icon(painterResource(R.drawable.ic_article), null, Modifier.size(24.dp), tint = MaterialTheme.colorScheme.onPrimaryContainer)
             }
             Column(Modifier.weight(1f)) {
@@ -175,7 +175,7 @@ internal fun LinkRow(message: MessageItem, shape: RoundedCornerShape, context: S
     RowShell(shape, { onOpenLink(first) }, { context.onMenu(message) }, Modifier.testTag("sharedLink_${message.id}")) {
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.Top) {
             val photo = preview?.photo
-            Box(Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(48.dp).clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
                 if (photo != null) {
                     val side = with(LocalDensity.current) { 48.dp.roundToPx() }
                     val small = remember(photo, side) { photo.preview(side) }
@@ -257,7 +257,7 @@ internal fun VoiceRow(message: MessageItem, shape: RoundedCornerShape, context: 
     val current = context.music?.takeIf { it.isTrack(context.dialogKey, message.id) }
     val total = current?.lengthMs ?: (media.duration * 1000L)
     val progress = if (current != null && total > 0) (current.positionMs.toFloat() / total).coerceIn(0f, 1f) else 0f
-    val container = MaterialTheme.colorScheme.surfaceContainerLow
+    val container = MaterialTheme.colorScheme.surfaceContainer
     val time = if (current != null) stringResource(R.string.chat_voice_progress, voiceTime(current.positionMs), voiceTime(total)) else voiceTime(total)
     RowShell(shape, onPlay, { context.onMenu(message) }, Modifier.testTag("sharedVoice_${message.id}")) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
