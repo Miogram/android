@@ -1050,7 +1050,6 @@
     <string name="music_next">Next</string>
     <string name="music_previous">Previous</string>
     <string name="music_shuffle">Shuffle</string>
-    <string name="music_order">Order</string>
     <string name="music_order_chat">In chat order</string>
     <string name="music_order_reverse">Newest first</string>
     <string name="music_repeat">Repeat</string>
@@ -1071,13 +1070,12 @@
     <string name="music_save_to_profile">Add to my profile</string>
     <string name="music_saved_to_profile">Added to your profile</string>
     <string name="music_collapse">Minimize the player</string>
+    <string name="music_open">Open the player</string>
+    <string name="music_cover">Cover of %1$s</string>
+    <string name="music_photo">Photo of %1$s</string>
+    <string name="music_seek_state">%1$s of %2$s</string>
     <string name="music_position">%1$d of %2$d</string>
     <string name="music_queue">Queue</string>
-    <string name="music_remaining">−%1$s</string>
-    <string name="music_show_left">Show the time left</string>
-    <string name="music_show_length">Show the length</string>
-    <string name="music_repeat_all_short">All</string>
-    <string name="music_repeat_one_short">One</string>
     <string name="music_order_chat_short">In order</string>
     <string name="music_order_reverse_short">Newest</string>
     <string name="music_order_choose">Choose the order</string>

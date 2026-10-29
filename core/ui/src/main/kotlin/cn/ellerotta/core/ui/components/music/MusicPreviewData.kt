@@ -70,7 +70,7 @@ internal object MusicPreviewData {
         cover = previewPhoto(width = 256, start = 0xFF2E7D4F.toInt(), end = 0xFFB8E06A.toInt()),
         speed = 1.5f,
         sleep = MusicSleep(leftMs = 892_000),
-        lyrics = "tonight we talk about the sea\nand the boats that never came back",
+        lyrics = List(4) { "tonight we talk about the sea\nand the boats that never came back\nthe lighthouse keeps its watch\nwhile the radio hums along" }.joinToString("\n\n"),
     )
 
     val pausedNoCover = playing.copy(index = 3, playing = false, positionMs = 0, durationMs = 0, order = MusicOrder.Reverse, repeat = MusicRepeat.One, cover = null)

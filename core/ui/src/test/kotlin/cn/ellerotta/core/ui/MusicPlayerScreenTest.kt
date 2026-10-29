@@ -1,6 +1,14 @@
 package cn.ellerotta.core.ui
 
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertHeightIsEqualTo
+import androidx.compose.ui.test.assertWidthIsEqualTo
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
+import androidx.compose.ui.unit.dp
+import kotlin.test.assertTrue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -127,20 +135,46 @@ class MusicPlayerScreenTest {
     }
 
     @Test
-    fun theLengthSwitchesToTheTimeLeftAndTheCoverSwipesToSkip() {
-        player(MusicState(queue, index = 1, playing = true, positionMs = 30_000, durationMs = 185_000))
+    fun theTimesSitUnderTheWaveTheModesKeepTheirSizeAndTheCoverSwipesToSkip() {
+        player(MusicState(queue, index = 1, playing = true, positionMs = 30_000, durationMs = 185_000, lyrics = "la la la"))
         compose.onNodeWithTag("sheetPosition").assertTextEquals("0:30")
         compose.onNodeWithTag("sheetLength").assertTextEquals("3:05")
-        compose.onNodeWithTag("sheetLength").performClick()
-        compose.onNodeWithTag("sheetLength").assertTextEquals("−2:35")
-        compose.onNodeWithTag("sheetLength").performClick()
-        compose.onNodeWithTag("sheetLength").assertTextEquals("3:05")
+        compose.onNodeWithTag("sheetSeek").assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "0:30 of 3:05"))
+        val seek = compose.onNodeWithTag("sheetSeek").getUnclippedBoundsInRoot()
+        val time = compose.onNodeWithTag("sheetPosition").getUnclippedBoundsInRoot()
+        val wave = (seek.top + seek.bottom) / 2
+        assertTrue(time.top - wave in 15.dp..17.dp, "the time starts ${time.top - wave} under the wave")
+        listOf("sheetShuffle", "sheetRepeat", "sheetLyricsToggle", "sheetSleep").forEach { tag ->
+            compose.onNodeWithTag(tag).assertWidthIsEqualTo(52.dp)
+        }
+        compose.onNodeWithTag("sheetToggle").assertHeightIsEqualTo(96.dp)
 
         compose.onNodeWithTag("sheetCover").performTouchInput { swipeLeft() }
         compose.waitForIdle()
         compose.onNodeWithTag("sheetCover").performTouchInput { swipeRight() }
         compose.waitForIdle()
         assertEquals(listOf("next", "previous"), calls)
+    }
+
+    @Test
+    fun aSeekHoldsItsPlaceUntilThePlayerGetsThere() {
+        var state by mutableStateOf(MusicState(queue, index = 0, playing = true, positionMs = 30_000, durationMs = 185_000))
+        compose.setContent { MioTheme { MusicPlayerContent(state, actions, onCollapse = {}) } }
+        compose.onNodeWithTag("sheetSeek").performSemanticsAction(SemanticsActions.SetProgress) { it(0.5f) }
+        assertEquals("seek 92500", calls.last())
+        compose.onNodeWithTag("sheetPosition").assertTextEquals("1:32")
+        state = state.copy(positionMs = 30_500)
+        compose.onNodeWithTag("sheetPosition").assertTextEquals("1:32")
+        state = state.copy(positionMs = 92_600)
+        compose.waitForIdle()
+        state = state.copy(positionMs = 95_000)
+        compose.onNodeWithTag("sheetPosition").assertTextEquals("1:35")
+
+        compose.onNodeWithTag("sheetSeek").performSemanticsAction(SemanticsActions.SetProgress) { it(0.25f) }
+        assertEquals("seek 46250", calls.last())
+        compose.onNodeWithTag("sheetPosition").assertTextEquals("0:46")
+        compose.mainClock.advanceTimeBy(2_100)
+        compose.onNodeWithTag("sheetPosition").assertTextEquals("1:35")
     }
 
     @Test
@@ -206,6 +240,19 @@ class MusicPlayerScreenTest {
         compose.waitUntil { compose.onAllNodesWithTag("sheetCollapse").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("sheetCollapse").performClick()
         compose.waitUntil { compose.onAllNodesWithTag("musicSheet").fetchSemanticsNodes().isEmpty() }
+    }
+
+    @Test
+    fun theWordsTakeTheCoversPlaceInTheOverlay() {
+        val state = MusicState(queue, index = 0, playing = true, durationMs = 185_000, lyrics = "la la la")
+        compose.setContent { MioTheme { MusicPlayerOverlay(state, open = true, actions, onDismiss = {}) } }
+        compose.waitUntil { compose.onAllNodesWithTag("sheetCover").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("sheetLyricsToggle").performClick()
+        compose.waitUntil { compose.onAllNodesWithTag("sheetCover").fetchSemanticsNodes().isEmpty() }
+        compose.onNodeWithTag("sheetLyrics").assertTextEquals("la la la")
+        compose.onNodeWithTag("sheetLyricsToggle").performClick()
+        compose.waitUntil { compose.onAllNodesWithTag("sheetLyrics").fetchSemanticsNodes().isEmpty() }
+        compose.onNodeWithTag("sheetCover").assertExists()
     }
 
     @Test

@@ -95,6 +95,7 @@ fun ChatsScreen(
     globalResults: List<DialogItem> = emptyList(),
     onSearch: (String) -> Unit = {},
     player: (@Composable () -> Unit)? = null,
+    playerShown: Boolean = true,
     contacts: ContactsPageState = ContactsPageState(),
     contactsActions: ContactsActions = ContactsActions(),
     settings: SettingsPageState = SettingsPageState(),
@@ -401,7 +402,13 @@ fun ChatsScreen(
                     }
                 }
 
-                player?.invoke()
+                AnimatedVisibility(
+                    visible = player != null && playerShown,
+                    enter = expandVertically(animationSpec = sizeSpatialSpec) + fadeIn(animationSpec = effectsSpec),
+                    exit = shrinkVertically(animationSpec = sizeSpatialSpec) + fadeOut(animationSpec = effectsSpec),
+                ) {
+                    Box(Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 8.dp)) { player?.invoke() }
+                }
             }
         },
     ) { innerPadding ->

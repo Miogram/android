@@ -5,6 +5,8 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.activity.ComponentActivity
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
@@ -50,6 +52,8 @@ internal fun EntryProviderScope<Route>.chatsEntries(activity: ComponentActivity,
         val storyPeers by model.storyPeers.collectAsStateWithLifecycle()
         val myStories by model.myStories.collectAsStateWithLifecycle()
         val canPost by model.canPost.collectAsStateWithLifecycle()
+        val musicModel = musicModel()
+        val playerShown by remember(musicModel) { musicModel.music.map { it != null }.distinctUntilChanged() }.collectAsStateWithLifecycle(musicModel.music.value != null)
         val contactsModel = hiltViewModel<ContactsViewModel>()
         val contacts by contactsModel.contacts.collectAsStateWithLifecycle()
         val contactsLoading by contactsModel.loading.collectAsStateWithLifecycle()
@@ -138,7 +142,8 @@ internal fun EntryProviderScope<Route>.chatsEntries(activity: ComponentActivity,
                         onLoadMore = model::loadMore,
                         globalResults = globalResults,
                         onSearch = model::search,
-                        player = { MusicBar() },
+                        player = { MusicBar(keepLast = true) },
+                        playerShown = playerShown,
                         contacts = ContactsPageState(contacts, contactsLoading, contactsFound, notFound, added),
                         contactsActions = contactsActions,
                         settings = SettingsPageState(sessions, appearance, autoSaveDownloads, version, library, apps),

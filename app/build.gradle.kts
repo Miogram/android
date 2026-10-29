@@ -43,7 +43,7 @@ android {
         minSdk = 31
         targetSdk = 37
         versionCode = buildNumber
-        versionName = "0.1.1-$gitCommit" + if (gitDirty) "-dirty" else ""
+        versionName = "0.1.2-$gitCommit" + if (gitDirty) "-dirty" else ""
         buildConfigField("String", "FIREBASE_API_KEY", quoted(localProperties.getProperty("firebase.apiKey")))
         buildConfigField("String", "FIREBASE_PROJECT_ID", quoted(localProperties.getProperty("firebase.projectId")))
         buildConfigField("String", "FIREBASE_SENDER_ID", quoted(localProperties.getProperty("firebase.senderId")))

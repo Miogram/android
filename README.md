@@ -44,4 +44,6 @@ set, otherwise with the debug key.
 
 ## License
 
-Apache License 2.0, see `LICENSE`. Third-party material is listed in `NOTICE`.
+GNU General Public License version 3, see `LICENSE`, with an additional permission for linking
+with Google Play services, Firebase and the Google Maps SDK in `NOTICE`. Releases up to 0.1.1
+were published under the Apache License 2.0. Third-party material is listed in `NOTICE`.

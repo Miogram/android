@@ -1,30 +1,25 @@
 package cn.ellerotta.core.ui.components.music
 
-import android.graphics.BitmapFactory
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,17 +31,20 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonGroup
+import androidx.compose.material3.ButtonGroupScope
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilledTonalIconToggleButton
+import androidx.compose.material3.FilledTonalToggleButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconButtonShapes
+import androidx.compose.material3.IconToggleButtonShapes
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialShapes
@@ -56,16 +54,15 @@ import androidx.compose.material3.SelectableDropdownMenuItem
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SliderState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.WavyProgressIndicatorDefaults
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.toPath
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
@@ -79,17 +76,21 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.lerp
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.layout
@@ -104,14 +105,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.onLongClick
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -124,14 +125,19 @@ import cn.ellerotta.core.model.MusicOrder
 import cn.ellerotta.core.model.MusicRepeat
 import cn.ellerotta.core.model.MusicSleep
 import cn.ellerotta.core.model.MusicState
+import cn.ellerotta.core.model.MusicTrack
 import cn.ellerotta.core.model.SLEEP_MINUTES
 import cn.ellerotta.core.ui.R
 import cn.ellerotta.core.ui.components.chat.speedText
 import cn.ellerotta.core.ui.components.chat.voiceTime
+import cn.ellerotta.core.ui.components.common.TopBarPill
+import cn.ellerotta.core.ui.components.common.TopBarTokens
+import cn.ellerotta.core.ui.components.common.rememberDecodedPhoto
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -156,22 +162,29 @@ fun MusicPlayerOverlay(state: MusicState?, open: Boolean, actions: MusicActions,
     val anchor = LocalMusicCoverAnchor.current
     val motion = MaterialTheme.motionScheme
     val progress = remember { Animatable(0f) }
+    val fade = remember { Animatable(0f) }
     var showing by remember { mutableStateOf(false) }
     val target = open && state != null
     LaunchedEffect(target) {
-        if (target) {
-            showing = true
-            progress.animateTo(1f, motion.slowSpatialSpec())
-        } else {
-            progress.animateTo(0f, motion.defaultSpatialSpec())
-            showing = false
+        if (target) showing = true
+        coroutineScope {
+            launch { fade.animateTo(if (target) 1f else 0f, if (target) motion.slowEffectsSpec() else motion.defaultEffectsSpec()) }
+            launch { progress.animateTo(if (target) 1f else 0f, if (target) motion.slowSpatialSpec() else motion.defaultSpatialSpec()) }
         }
+        if (!target) showing = false
     }
     SideEffect { anchor?.taken = showing }
+    rememberCoverSeed(shown.cover)
     if (!showing) return
     MaterialTheme(colorScheme = rememberArtworkScheme(shown.cover)) {
-        PlayerPage(shown, actions, progress, anchor, target, onDismiss)
+        PlayerPage(shown, actions, progress, fade, anchor, target, onDismiss)
     }
+}
+
+@Stable
+private class CoverPlace {
+    var bounds: Rect? by mutableStateOf(null)
+    var page: LayoutCoordinates? = null
 }
 
 @Composable
@@ -179,6 +192,7 @@ private fun PlayerPage(
     state: MusicState,
     actions: MusicActions,
     progress: Animatable<Float, AnimationVector1D>,
+    fade: Animatable<Float, AnimationVector1D>,
     anchor: MusicCoverAnchor?,
     open: Boolean,
     onDismiss: () -> Unit,
@@ -189,8 +203,9 @@ private fun PlayerPage(
     var drag by remember { mutableFloatStateOf(0f) }
     val back = remember { Animatable(0f) }
     var height by remember { mutableIntStateOf(0) }
-    var root by remember { mutableStateOf<LayoutCoordinates?>(null) }
-    var coverBounds by remember { mutableStateOf<Rect?>(null) }
+    val place = remember { CoverPlace() }
+    val placed by remember { derivedStateOf { place.bounds != null } }
+    val coverShown = remember { arrayOf<() -> Float>({ 1f }) }
     PredictiveBackHandler(enabled = open) { events ->
         try {
             events.collect { back.snapTo(it.progress) }
@@ -211,7 +226,7 @@ private fun PlayerPage(
         Modifier
             .fillMaxSize()
             .onSizeChanged { height = it.height }
-            .onGloballyPositioned { root = it }
+            .onGloballyPositioned { place.page = it }
             .graphicsLayer {
                 val b = back.value
                 scaleX = 1f - BACK_SCALE * b
@@ -237,45 +252,50 @@ private fun PlayerPage(
             Modifier
                 .fillMaxSize()
                 .offset { IntOffset(0, ((1f - progress.value) * height * SLIDE_SHARE + drag).roundToInt()) }
-                .graphicsLayer { alpha = progress.value.coerceIn(0f, 1f) }
+                .graphicsLayer { alpha = fade.value }
                 .background(MaterialTheme.colorScheme.surface),
         ) {
             MusicPlayerContent(
                 state,
                 actions,
                 onCollapse = onDismiss,
-                cover = { modifier ->
+                cover = { modifier, shown ->
+                    coverShown[0] = shown
                     Spacer(
                         modifier.onGloballyPositioned { placed ->
-                            val page = root ?: return@onGloballyPositioned
-                            if (page.isAttached && placed.isAttached) coverBounds = page.localBoundingBoxOf(placed)
+                            val page = place.page ?: return@onGloballyPositioned
+                            if (page.isAttached && placed.isAttached) place.bounds = page.localBoundingBoxOf(placed)
                         },
                     )
+                    DisposableEffect(Unit) { onDispose { place.bounds = null } }
                 },
             )
         }
-        val end = coverBounds
-        if (end != null) {
-            val start = remember(anchor?.bounds, root) {
-                val from = anchor?.bounds
-                val page = root
-                if (from == null || page == null || !page.isAttached) null else from.translate(-page.positionInWindow())
-            }
+        if (placed) {
             PlayerCover(
-                state,
+                state.track,
+                state.cover,
+                state.playing,
                 actions,
                 swipe = open,
                 modifier = Modifier
                     .layout { measurable, constraints ->
-                        val p = progress.value
-                        val rect = if (start == null) end else lerp(start, end, p)
+                        val end = place.bounds ?: Rect.Zero
+                        val start = startOf(anchor, place.page)
+                        val rect = if (start == null) end else lerp(start, end, progress.value)
                         val placeable = measurable.measure(Constraints.fixed(rect.width.roundToInt().coerceAtLeast(1), rect.height.roundToInt().coerceAtLeast(1)))
                         layout(constraints.maxWidth, constraints.maxHeight) { placeable.place(rect.left.roundToInt(), rect.top.roundToInt()) }
                     }
-                    .graphicsLayer { if (start == null) alpha = progress.value.coerceIn(0f, 1f) },
+                    .graphicsLayer { alpha = (if (anchor?.bounds == null) fade.value else 1f) * coverShown[0]() },
             )
         }
     }
+}
+
+private fun startOf(anchor: MusicCoverAnchor?, page: LayoutCoordinates?): Rect? {
+    val from = anchor?.bounds ?: return null
+    if (page == null || !page.isAttached) return null
+    return from.translate(-page.positionInWindow())
 }
 
 @Composable
@@ -284,61 +304,116 @@ internal fun MusicPlayerContent(
     actions: MusicActions,
     onCollapse: () -> Unit,
     modifier: Modifier = Modifier,
-    cover: @Composable (Modifier) -> Unit = { PlayerCover(state, actions, swipe = true, modifier = it) },
+    showLyrics: Boolean = false,
+    cover: @Composable (modifier: Modifier, shown: () -> Float) -> Unit = { modifier, _ ->
+        PlayerCover(state.track, state.cover, state.playing, actions, swipe = true, modifier = modifier)
+    },
 ) {
     var queueOpen by rememberSaveable { mutableStateOf(false) }
     val track = state.track
-    var lyricsOpen by rememberSaveable(track.slot) { mutableStateOf(false) }
+    var lyricsOpen by rememberSaveable(track.slot) { mutableStateOf(showLyrics) }
     val lyrics = state.lyrics
+    val lastLyrics = remember { arrayOfNulls<String>(1) }
+    lyrics?.let { lastLyrics[0] = it }
+    val motion = MaterialTheme.motionScheme
+    val words = lyricsOpen && lyrics != null
+    val fade = animateFloatAsState(if (words) 1f else 0f, motion.defaultEffectsSpec(), label = "lyricsFade")
+    val rise = animateFloatAsState(if (words) 1f else 0f, motion.defaultSpatialSpec(), label = "lyricsRise")
+    val coverIn by remember { derivedStateOf { fade.value < 1f } }
+    val wordsIn by remember { derivedStateOf { fade.value > 0f } }
+    val seek = rememberSeekHold(state)
     Column(
         modifier
             .fillMaxSize()
             .statusBarsPadding()
             .navigationBarsPadding()
-            .padding(horizontal = 24.dp)
             .testTag("musicSheet"),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onCollapse, shapes = IconButtonDefaults.shapes(), modifier = Modifier.testTag("sheetCollapse")) {
-                Icon(painterResource(R.drawable.ic_keyboard_arrow_down), stringResource(R.string.music_collapse))
+        PlayerBar(state.index + 1, state.queue.size, state.sleep, track.saved, onCollapse, onQueue = { queueOpen = true }, actions)
+        Box(Modifier.weight(1f).fillMaxWidth().padding(horizontal = PAGE_MARGIN, vertical = COVER_GAP), contentAlignment = Alignment.Center) {
+            if (coverIn) {
+                cover(
+                    Modifier.widthIn(max = COVER_MAX).aspectRatio(1f).graphicsLayer {
+                        alpha = 1f - fade.value
+                        val scale = 1f - LYRICS_COVER_SHRINK * rise.value
+                        scaleX = scale
+                        scaleY = scale
+                    },
+                ) { 1f - fade.value }
             }
-            val sleep = state.sleep
-            Text(
-                when {
-                    sleep == null -> stringResource(R.string.music_position, state.index + 1, state.queue.size)
-                    sleep.endOfTrack -> stringResource(R.string.music_sleep_at_end)
-                    else -> stringResource(R.string.music_sleep_left, voiceTime(sleep.leftMs))
-                },
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.weight(1f).testTag("sheetStatus"),
-            )
-            SleepButton(sleep, actions)
-            QueueButton(onClick = { queueOpen = true })
-            MoreButton(state, actions)
-        }
-        Box(Modifier.weight(1f).fillMaxWidth().padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
-            if (lyricsOpen && lyrics != null) {
-                Text(
-                    lyrics,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(PAGE_CORNER))
-                        .background(MaterialTheme.colorScheme.surfaceContainer)
-                        .verticalScroll(rememberScrollState())
-                        .padding(24.dp)
-                        .testTag("sheetLyrics"),
+            val text = lastLyrics[0]
+            if (wordsIn && text != null) {
+                Lyrics(
+                    text,
+                    Modifier.fillMaxSize().graphicsLayer {
+                        alpha = fade.value
+                        translationY = (1f - rise.value) * LYRICS_RISE.toPx()
+                    },
                 )
-            } else {
-                cover(Modifier.widthIn(max = COVER_MAX).aspectRatio(1f))
             }
         }
-        key(track.slot) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = PAGE_MARGIN)) {
+            TitleRow(track, actions.onSaveToProfile)
+            SeekBlock(state, seek, actions.onSeek)
+            Spacer(Modifier.height(CONTROLS_GAP))
+            Transport(state.playing, actions)
+            Spacer(Modifier.height(CONTROLS_GAP))
+            Modes(track, state.order, state.repeat, state.speed, lyrics != null, lyricsOpen, state.sleep, actions, onLyrics = { lyricsOpen = !lyricsOpen })
+            Spacer(Modifier.height(BOTTOM_GAP))
+        }
+    }
+    if (queueOpen) MusicQueueSheet(state, actions, onDismiss = { queueOpen = false })
+}
+
+@Composable
+private fun PlayerBar(position: Int, count: Int, sleep: MusicSleep?, saved: Boolean, onCollapse: () -> Unit, onQueue: () -> Unit, actions: MusicActions) {
+    Box(Modifier.fillMaxWidth().padding(start = TopBarTokens.EdgeInset, end = TopBarTokens.EdgeInset, top = TopBarTokens.EdgeInset)) {
+        TopBarPill(R.drawable.ic_keyboard_arrow_down, stringResource(R.string.music_collapse), onCollapse, Modifier.align(Alignment.CenterStart).testTag("sheetCollapse"))
+        Text(
+            when {
+                sleep == null -> stringResource(R.string.music_position, position, count)
+                sleep.endOfTrack -> stringResource(R.string.music_sleep_at_end)
+                else -> stringResource(R.string.music_sleep_left, voiceTime(sleep.leftMs))
+            },
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.align(Alignment.Center).padding(horizontal = BAR_TITLE_INSET).testTag("sheetStatus"),
+        )
+        Row(Modifier.align(Alignment.CenterEnd), horizontalArrangement = Arrangement.spacedBy(TopBarTokens.PillGap)) {
+            TopBarPill(R.drawable.ic_queue_music, stringResource(R.string.music_queue), onQueue, Modifier.testTag("sheetQueue"))
+            if (!saved) MoreButton(actions)
+        }
+    }
+}
+
+@Composable
+private fun MoreButton(actions: MusicActions) {
+    var menu by remember { mutableStateOf(false) }
+    Box {
+        TopBarPill(R.drawable.ic_more_vert, stringResource(R.string.music_entry_menu), { menu = true }, Modifier.testTag("sheetMore"))
+        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.music_go_to_message)) },
+                onClick = {
+                    menu = false
+                    actions.onGoToMessage()
+                },
+                shape = MenuDefaults.itemShape(0, 1).shape,
+                leadingIcon = { Icon(painterResource(R.drawable.ic_chat), null) },
+                modifier = Modifier.testTag("sheetGoToMessage"),
+            )
+        }
+    }
+}
+
+@Composable
+private fun TitleRow(track: MusicTrack, onSaveToProfile: () -> Unit) {
+    key(track.slot) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(
                     track.heading(),
@@ -357,45 +432,38 @@ internal fun MusicPlayerContent(
             }
             if (!track.isVoice) {
                 FilledTonalIconButton(
-                    onClick = actions.onSaveToProfile,
-                    shapes = IconButtonShapes(shape = RoundedCornerShape(PROFILE_CORNER), pressedShape = RoundedCornerShape(PROFILE_PRESSED_CORNER)),
+                    onClick = onSaveToProfile,
+                    shapes = IconButtonShapes(shape = IconButtonDefaults.smallSquareShape, pressedShape = IconButtonDefaults.smallPressedShape),
                     modifier = Modifier.padding(start = 8.dp).testTag("sheetSaveToProfile"),
                 ) {
                     Icon(painterResource(R.drawable.ic_favorite), stringResource(R.string.music_save_to_profile))
                 }
             }
-            }
         }
-        Spacer(Modifier.height(12.dp))
-        WavySeekBar(state, actions.onSeek)
-        TimeRow(state)
-        Spacer(Modifier.height(8.dp))
-        Transport(state, actions)
-        Spacer(Modifier.height(20.dp))
-        ModeGroup(state, actions, lyricsOpen, onLyrics = { lyricsOpen = !lyricsOpen })
-        Spacer(Modifier.height(16.dp))
     }
-    if (queueOpen) MusicQueueSheet(state, actions, onDismiss = { queueOpen = false })
 }
 
 @Composable
-private fun PlayerCover(state: MusicState, actions: MusicActions, swipe: Boolean, modifier: Modifier = Modifier) {
-    val voice = state.track.isVoice
-    val bitmap = remember(state.cover) { state.cover?.let { BitmapFactory.decodeByteArray(it, 0, it.size)?.asImageBitmap() } }
+private fun PlayerCover(track: MusicTrack, cover: ByteArray?, playing: Boolean, actions: MusicActions, swipe: Boolean, modifier: Modifier = Modifier) {
+    val voice = track.isVoice
+    val bitmap = rememberDecodedPhoto(cover)
     val motion = MaterialTheme.motionScheme
-    val paused by animateFloatAsState(if (state.playing) 0f else 1f, motion.slowSpatialSpec(), label = "coverPause")
+    val paused by animateFloatAsState(if (playing) 0f else 1f, motion.slowSpatialSpec(), label = "coverPause")
     val morph = remember { Morph(MaterialShapes.Square, MaterialShapes.Cookie12Sided) }
     val skip = remember { SkipSwipe() }
     val container = MaterialTheme.colorScheme.tertiaryContainer
+    val label = stringResource(if (voice) R.string.music_photo else R.string.music_cover, track.heading())
     Box(
         modifier
             .skipSwipe(skip, actions, enabled = swipe)
+            .semantics { contentDescription = label }
             .graphicsLayer {
                 val p = paused.coerceIn(0f, 1f)
                 val scale = 1f - PAUSED_SHRINK * paused
                 scaleX = scale
                 scaleY = scale
                 translationX = skip.offset
+                rotationZ = skip.offset / SWIPE_TILT.toPx()
                 alpha = 1f - skip.share * SWIPE_FADE
                 shape = if (voice) CircleShape else MorphShape(morph, p)
                 clip = true
@@ -452,7 +520,7 @@ internal fun Modifier.skipSwipe(swipe: SkipSwipe, actions: MusicActions, enabled
                     return@draggable
                 }
                 val side = swipe.width.toFloat()
-                animate(swipe.offset, if (forward) -side else side, animationSpec = motion.fastEffectsSpec()) { value, _ -> swipe.offset = value }
+                animate(swipe.offset, if (forward) -side else side, initialVelocity = velocity, animationSpec = motion.fastSpatialSpec()) { value, _ -> swipe.offset = value }
                 if (forward) actions.onNext() else actions.onPrevious()
                 swipe.offset = if (forward) side * SWIPE_ENTRY else -side * SWIPE_ENTRY
                 scope.launch { animate(swipe.offset, 0f, animationSpec = motion.defaultSpatialSpec()) { value, _ -> swipe.offset = value } }
@@ -478,24 +546,83 @@ private class MorphShape(private val morph: Morph, private val progress: Float) 
     override fun hashCode(): Int = 31 * morph.hashCode() + progress.hashCode()
 }
 
+@Stable
+internal class SeekHold {
+    var dragging by mutableStateOf<Float?>(null)
+    var sought by mutableStateOf<Long?>(null)
+
+    fun shownMs(state: MusicState): Long = dragging?.let { (it * state.lengthMs).toLong() } ?: sought ?: state.positionMs
+}
+
 @Composable
-internal fun WavySeekBar(state: MusicState, onSeek: (Long) -> Unit, modifier: Modifier = Modifier) {
+internal fun rememberSeekHold(state: MusicState): SeekHold {
+    val seek = remember(state.track.slot) { SeekHold() }
+    val sought = seek.sought
+    LaunchedEffect(seek, sought) {
+        if (sought == null) return@LaunchedEffect
+        delay(SEEK_HOLD_MS)
+        seek.sought = null
+    }
+    if (sought != null && abs(state.positionMs - sought) <= SEEK_REACHED_MS) {
+        SideEffect { if (seek.sought == sought) seek.sought = null }
+    }
+    return seek
+}
+
+@Composable
+private fun SeekBlock(state: MusicState, seek: SeekHold, onSeek: (Long) -> Unit) {
     val length = state.lengthMs
-    var dragging by remember { mutableStateOf<Float?>(null) }
-    val fraction = dragging ?: if (length > 0) (state.positionMs.toFloat() / length).coerceIn(0f, 1f) else 0f
+    val position = seek.shownMs(state)
+    val style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum")
+    val color = MaterialTheme.colorScheme.onSurfaceVariant
+    val dragged by animateColorAsState(
+        if (seek.dragging != null) MaterialTheme.colorScheme.primary else color,
+        MaterialTheme.motionScheme.fastEffectsSpec(),
+        label = "seekTime",
+    )
+    Layout(
+        content = {
+            WavySeekBar(state, seek, onSeek, stateText = stringResource(R.string.music_seek_state, voiceTime(position), voiceTime(length)))
+            Text(voiceTime(position), style = style, color = dragged, modifier = Modifier.testTag("sheetPosition"))
+            Text(voiceTime(length), style = style, color = color, modifier = Modifier.testTag("sheetLength"))
+        },
+        modifier = Modifier.fillMaxWidth(),
+    ) { measurables, constraints ->
+        val bar = measurables[0].measure(constraints.copy(minHeight = 0))
+        val loose = constraints.copy(minWidth = 0, minHeight = 0)
+        val gone = measurables[1].measure(loose)
+        val total = measurables[2].measure(loose)
+        val top = bar.height / 2 + (maxOf(THUMB.height, WavyProgressIndicatorDefaults.LinearContainerHeight) / 2 + TIME_GAP).roundToPx()
+        val height = max(bar.height, top + max(gone.height, total.height))
+        layout(constraints.maxWidth, height) {
+            bar.place(0, 0)
+            gone.place(0, top)
+            total.place(constraints.maxWidth - total.width, top)
+        }
+    }
+}
+
+@Composable
+internal fun WavySeekBar(state: MusicState, seek: SeekHold, onSeek: (Long) -> Unit, stateText: String, modifier: Modifier = Modifier) {
+    val length = state.lengthMs
+    val fraction = if (length > 0) (seek.shownMs(state).toFloat() / length).coerceIn(0f, 1f) else 0f
     val slider = remember { SliderState(fraction) }
     slider.value = fraction
     val interactions = remember { MutableInteractionSource() }
     val scheme = MaterialTheme.colorScheme
     val colors = SliderDefaults.colors(thumbColor = scheme.primary, activeTrackColor = scheme.primary, inactiveTrackColor = scheme.secondaryContainer)
     val label = stringResource(R.string.viewer_seek)
-    val waving = state.playing && dragging == null
+    val waving = state.playing && seek.dragging == null
     Slider(
         slider,
-        onValueChange = { dragging = it },
+        onValueChange = { seek.dragging = it },
         onValueChangeFinished = {
-            dragging?.let { onSeek((it * length).toLong()) }
-            dragging = null
+            seek.dragging?.let {
+                val to = (it * length).toLong()
+                seek.sought = to
+                onSeek(to)
+            }
+            seek.dragging = null
         },
         enabled = length > 0,
         colors = colors,
@@ -510,210 +637,241 @@ internal fun WavySeekBar(state: MusicState, onSeek: (Long) -> Unit, modifier: Mo
                 modifier = Modifier.fillMaxWidth().clearAndSetSemantics {},
             )
         },
-        modifier = modifier.fillMaxWidth().semantics { contentDescription = label }.testTag("sheetSeek"),
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics {
+                contentDescription = label
+                stateDescription = stateText
+            }
+            .testTag("sheetSeek"),
     )
 }
 
 @Composable
-private fun TimeRow(state: MusicState) {
-    var left by rememberSaveable { mutableStateOf(false) }
-    val length = state.lengthMs
-    val style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum")
-    val color = MaterialTheme.colorScheme.onSurfaceVariant
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(voiceTime(state.positionMs), style = style, color = color, modifier = Modifier.testTag("sheetPosition"))
-        Spacer(Modifier.weight(1f))
-        Text(
-            if (left) stringResource(R.string.music_remaining, voiceTime((length - state.positionMs).coerceAtLeast(0))) else voiceTime(length),
-            style = style,
-            color = color,
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable(onClickLabel = stringResource(if (left) R.string.music_show_length else R.string.music_show_left), role = Role.Button) { left = !left }
-                .minimumInteractiveComponentSize()
-                .padding(horizontal = 8.dp)
-                .testTag("sheetLength"),
+private fun Transport(playing: Boolean, actions: MusicActions) {
+    val previous = remember { MutableInteractionSource() }
+    val play = remember { MutableInteractionSource() }
+    val next = remember { MutableInteractionSource() }
+    val haptics = LocalHapticFeedback.current
+    val scheme = MaterialTheme.colorScheme
+    val skipShapes = IconButtonShapes(shape = IconButtonDefaults.largeRoundShape, pressedShape = IconButtonDefaults.largePressedShape)
+    val playShapes = IconToggleButtonShapes(
+        shape = IconButtonDefaults.largeRoundShape,
+        pressedShape = IconButtonDefaults.largePressedShape,
+        checkedShape = IconButtonDefaults.largeSelectedRoundShape,
+    )
+    val playColors = IconButtonDefaults.filledIconToggleButtonColors(
+        containerColor = scheme.primary,
+        contentColor = scheme.onPrimary,
+        checkedContainerColor = scheme.primary,
+        checkedContentColor = scheme.onPrimary,
+    )
+    ButtonGroup(overflowIndicator = {}, horizontalArrangement = Arrangement.spacedBy(TRANSPORT_GAP), modifier = Modifier.fillMaxWidth()) {
+        customItem(
+            buttonGroupContent = {
+                FilledTonalIconButton(
+                    onClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
+                        actions.onPrevious()
+                    },
+                    shapes = skipShapes,
+                    interactionSource = previous,
+                    modifier = Modifier.weight(1f).height(TRANSPORT_HEIGHT).animateWidth(previous).testTag("sheetPrevious"),
+                ) {
+                    Icon(painterResource(R.drawable.ic_skip_previous), stringResource(R.string.music_previous), Modifier.size(IconButtonDefaults.largeIconSize))
+                }
+            },
+            menuContent = {},
+        )
+        customItem(
+            buttonGroupContent = {
+                FilledIconToggleButton(
+                    checked = playing,
+                    onCheckedChange = {
+                        haptics.performHapticFeedback(if (playing) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn)
+                        actions.onToggle()
+                    },
+                    shapes = playShapes,
+                    colors = playColors,
+                    interactionSource = play,
+                    modifier = Modifier.weight(PLAY_WEIGHT).height(TRANSPORT_HEIGHT).animateWidth(play).testTag("sheetToggle"),
+                ) {
+                    PlayIcon(playing, Modifier.size(IconButtonDefaults.largeIconSize))
+                }
+            },
+            menuContent = {},
+        )
+        customItem(
+            buttonGroupContent = {
+                FilledTonalIconButton(
+                    onClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
+                        actions.onNext()
+                    },
+                    shapes = skipShapes,
+                    interactionSource = next,
+                    modifier = Modifier.weight(1f).height(TRANSPORT_HEIGHT).animateWidth(next).testTag("sheetNext"),
+                ) {
+                    Icon(painterResource(R.drawable.ic_skip_next), stringResource(R.string.music_next), Modifier.size(IconButtonDefaults.largeIconSize))
+                }
+            },
+            menuContent = {},
         )
     }
 }
 
 @Composable
-private fun Transport(state: MusicState, actions: MusicActions) {
-    val previous = remember { MutableInteractionSource() }
-    val play = remember { MutableInteractionSource() }
-    val next = remember { MutableInteractionSource() }
-    val pressedPrevious by previous.collectIsPressedAsState()
-    val pressedPlay by play.collectIsPressedAsState()
-    val pressedNext by next.collectIsPressedAsState()
-    val spec = MaterialTheme.motionScheme.fastSpatialSpec<Float>()
-    val any = pressedPrevious || pressedPlay || pressedNext
-    @Composable
-    fun weight(pressed: Boolean, rest: Float): Float = animateFloatAsState(
-        when {
-            pressed -> rest * PRESSED_WEIGHT
-            any -> rest * MAKE_WAY_WEIGHT
-            else -> rest
-        },
-        spec,
-        label = "transportWeight",
-    ).value
-    val scheme = MaterialTheme.colorScheme
-    Row(
-        Modifier.fillMaxWidth().height(TRANSPORT_HEIGHT),
-        horizontalArrangement = Arrangement.spacedBy(TRANSPORT_GAP),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        TransportButton(
-            onClick = actions.onPrevious,
-            corner = if (pressedPrevious) PRESSED_CORNER else HALF,
-            container = scheme.secondaryContainer,
-            content = scheme.onSecondaryContainer,
-            interactionSource = previous,
-            modifier = Modifier.weight(weight(pressedPrevious, SIDE_WEIGHT)).testTag("sheetPrevious"),
-        ) {
-            Icon(painterResource(R.drawable.ic_skip_previous), stringResource(R.string.music_previous), Modifier.size(TRANSPORT_ICON))
-        }
-        TransportButton(
-            onClick = actions.onToggle,
-            corner = when {
-                pressedPlay -> PRESSED_CORNER
-                state.playing -> PLAYING_CORNER
-                else -> HALF
-            },
-            container = scheme.primary,
-            content = scheme.onPrimary,
-            interactionSource = play,
-            toggled = state.playing,
-            modifier = Modifier.weight(weight(pressedPlay, PLAY_WEIGHT)).testTag("sheetToggle"),
-        ) {
-            PlayIcon(state.playing, Modifier.size(PLAY_ICON))
-        }
-        TransportButton(
-            onClick = actions.onNext,
-            corner = if (pressedNext) PRESSED_CORNER else HALF,
-            container = scheme.secondaryContainer,
-            content = scheme.onSecondaryContainer,
-            interactionSource = next,
-            modifier = Modifier.weight(weight(pressedNext, SIDE_WEIGHT)).testTag("sheetNext"),
-        ) {
-            Icon(painterResource(R.drawable.ic_skip_next), stringResource(R.string.music_next), Modifier.size(TRANSPORT_ICON))
+private fun Modes(
+    track: MusicTrack,
+    order: MusicOrder,
+    repeat: MusicRepeat,
+    speed: Float,
+    hasLyrics: Boolean,
+    lyricsOpen: Boolean,
+    sleep: MusicSleep?,
+    actions: MusicActions,
+    onLyrics: () -> Unit,
+) {
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        ButtonGroup(overflowIndicator = {}, horizontalArrangement = Arrangement.spacedBy(MODE_GAP)) {
+            if (!track.isVoice) {
+                customItem(buttonGroupContent = { OrderButton(order, actions) }, menuContent = {})
+                customItem(
+                    buttonGroupContent = {
+                        val interactions = remember { MutableInteractionSource() }
+                        ModeToggle(
+                            checked = repeat != MusicRepeat.Off,
+                            onClick = actions.onRepeat,
+                            icon = if (repeat == MusicRepeat.One) R.drawable.ic_repeat_one else R.drawable.ic_repeat,
+                            description = stringResource(
+                                when (repeat) {
+                                    MusicRepeat.Off -> R.string.music_repeat
+                                    MusicRepeat.All -> R.string.music_repeat_all
+                                    MusicRepeat.One -> R.string.music_repeat_one
+                                },
+                            ),
+                            interactionSource = interactions,
+                            modifier = Modifier.animateWidth(interactions).testTag("sheetRepeat"),
+                        )
+                    },
+                    menuContent = {},
+                )
+            }
+            if (track.hasSpeed) {
+                customItem(
+                    buttonGroupContent = {
+                        val interactions = remember { MutableInteractionSource() }
+                        val description = stringResource(R.string.music_speed_change, speedText(speed))
+                        FilledTonalToggleButton(
+                            checked = speed != 1f,
+                            onCheckedChange = { actions.onSpeed() },
+                            interactionSource = interactions,
+                            modifier = Modifier
+                                .animateWidth(interactions)
+                                .semantics { contentDescription = description }
+                                .testTag("sheetSpeed"),
+                        ) {
+                            Text(stringResource(R.string.music_speed, speedText(speed)), maxLines = 1, modifier = Modifier.clearAndSetSemantics {})
+                        }
+                    },
+                    menuContent = {},
+                )
+            }
+            if (hasLyrics) {
+                customItem(
+                    buttonGroupContent = {
+                        val interactions = remember { MutableInteractionSource() }
+                        ModeToggle(
+                            checked = lyricsOpen,
+                            onClick = onLyrics,
+                            icon = R.drawable.ic_lyrics,
+                            description = stringResource(R.string.music_lyrics),
+                            interactionSource = interactions,
+                            modifier = Modifier.animateWidth(interactions).testTag("sheetLyricsToggle"),
+                        )
+                    },
+                    menuContent = {},
+                )
+            }
+            customItem(buttonGroupContent = { SleepButton(sleep, actions) }, menuContent = {})
         }
     }
 }
 
 @Composable
-private fun TransportButton(
+private fun ModeToggle(
+    checked: Boolean,
     onClick: () -> Unit,
-    corner: Dp,
-    container: Color,
-    content: Color,
+    icon: Int,
+    description: String,
     interactionSource: MutableInteractionSource,
     modifier: Modifier = Modifier,
-    toggled: Boolean? = null,
-    icon: @Composable () -> Unit,
 ) {
-    val radius by animateDpAsState(corner, MaterialTheme.motionScheme.defaultSpatialSpec(), label = "transportCorner")
-    val shape = RoundedCornerShape(radius.coerceAtMost(TRANSPORT_HEIGHT / 2))
-    if (toggled != null) {
-        Surface(
-            checked = toggled,
-            onCheckedChange = { onClick() },
-            shape = shape,
-            color = container,
-            contentColor = content,
-            interactionSource = interactionSource,
-            modifier = modifier.fillMaxHeight(),
-        ) { Box(contentAlignment = Alignment.Center) { icon() } }
-    } else {
-        Surface(
-            onClick = onClick,
-            shape = shape,
-            color = container,
-            contentColor = content,
-            interactionSource = interactionSource,
-            modifier = modifier.fillMaxHeight(),
-        ) { Box(contentAlignment = Alignment.Center) { icon() } }
-    }
-}
-
-@Composable
-private fun ModeGroup(state: MusicState, actions: MusicActions, lyricsOpen: Boolean, onLyrics: () -> Unit) {
-    val track = state.track
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(50))
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .padding(horizontal = MODE_ROW_PADDING, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    FilledTonalIconToggleButton(
+        checked = checked,
+        onCheckedChange = { onClick() },
+        shapes = IconButtonDefaults.toggleableShapes(),
+        interactionSource = interactionSource,
+        modifier = modifier.size(IconButtonDefaults.smallContainerSize(IconButtonDefaults.IconButtonWidthOption.Wide)).semantics { contentDescription = description },
     ) {
-        if (!track.isVoice) {
-            OrderButton(state.order, actions, Modifier.weight(1f))
-            ModeButton(
-                checked = state.repeat != MusicRepeat.Off,
-                onClick = actions.onRepeat,
-                description = stringResource(
-                    when (state.repeat) {
-                        MusicRepeat.Off -> R.string.music_repeat
-                        MusicRepeat.All -> R.string.music_repeat_all
-                        MusicRepeat.One -> R.string.music_repeat_one
-                    },
-                ),
-                modifier = Modifier.weight(1f).testTag("sheetRepeat"),
-            ) { Icon(painterResource(if (state.repeat == MusicRepeat.One) R.drawable.ic_repeat_one else R.drawable.ic_repeat), null) }
-        }
-        if (track.hasSpeed) {
-            ModeButton(
-                checked = state.speed != 1f,
-                onClick = actions.onSpeed,
-                description = stringResource(R.string.music_speed_change, speedText(state.speed)),
-                modifier = Modifier.weight(1f).testTag("sheetSpeed"),
-            ) { Text(stringResource(R.string.music_speed, speedText(state.speed)), style = MaterialTheme.typography.labelLarge) }
-        }
-        if (state.lyrics != null) {
-            ModeButton(
-                checked = lyricsOpen,
-                onClick = onLyrics,
-                description = stringResource(R.string.music_lyrics),
-                modifier = Modifier.weight(1f).testTag("sheetLyricsToggle"),
-            ) { Icon(painterResource(R.drawable.ic_lyrics), null) }
-        }
+        Icon(painterResource(icon), null)
     }
 }
 
 @Composable
-private fun QueueButton(onClick: () -> Unit) {
-    FilledTonalIconButton(
-        onClick = onClick,
-        shapes = IconButtonShapes(
-            shape = RoundedCornerShape(topStart = CornerSize(QUEUE_CORNER), topEnd = CornerSize(50), bottomEnd = CornerSize(50), bottomStart = CornerSize(QUEUE_CORNER)),
-            pressedShape = RoundedCornerShape(QUEUE_CORNER),
-        ),
-        modifier = Modifier.size(QUEUE_WIDTH, QUEUE_HEIGHT).testTag("sheetQueue"),
-    ) {
-        Icon(painterResource(R.drawable.ic_queue_music), stringResource(R.string.music_queue))
-    }
-}
-
-@Composable
-private fun SleepButton(sleep: MusicSleep?, actions: MusicActions) {
+private fun ButtonGroupScope.OrderButton(order: MusicOrder, actions: MusicActions) {
     var menu by remember { mutableStateOf(false) }
-    Box {
-        FilledTonalIconToggleButton(
-            checked = sleep != null,
-            onCheckedChange = { menu = true },
-            shapes = IconButtonDefaults.toggleableShapes(),
-            colors = IconButtonDefaults.filledTonalIconToggleButtonColors(
-                containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                checkedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                checkedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            ),
-            modifier = Modifier.testTag("sheetSleep"),
-        ) {
-            Icon(painterResource(R.drawable.ic_bedtime), stringResource(R.string.music_sleep))
+    var held by remember { mutableStateOf(false) }
+    val interactions = remember { MutableInteractionSource() }
+    val haptics = LocalHapticFeedback.current
+    val timeout = LocalViewConfiguration.current.longPressTimeoutMillis
+    LaunchedEffect(interactions) {
+        interactions.interactions.collectLatest { interaction ->
+            if (interaction !is PressInteraction.Press) return@collectLatest
+            held = false
+            delay(timeout)
+            held = true
+            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+            menu = true
         }
+    }
+    val chooseLabel = stringResource(R.string.music_order_choose)
+    Box(Modifier.animateWidth(interactions)) {
+        ModeToggle(
+            checked = order != MusicOrder.Chat,
+            onClick = { if (held) held = false else actions.onShuffle() },
+            icon = if (order == MusicOrder.Reverse) R.drawable.ic_swap_vert else R.drawable.ic_shuffle,
+            description = stringResource(if (order == MusicOrder.Reverse) R.string.music_order_reverse else R.string.music_shuffle),
+            interactionSource = interactions,
+            modifier = Modifier
+                .semantics {
+                    onLongClick(chooseLabel) {
+                        menu = true
+                        true
+                    }
+                }
+                .testTag("sheetShuffle"),
+        )
+        OrderMenu(menu, order, onDismiss = { menu = false }) {
+            menu = false
+            actions.onOrder(it)
+        }
+    }
+}
+
+@Composable
+private fun ButtonGroupScope.SleepButton(sleep: MusicSleep?, actions: MusicActions) {
+    var menu by remember { mutableStateOf(false) }
+    val interactions = remember { MutableInteractionSource() }
+    Box(Modifier.animateWidth(interactions)) {
+        ModeToggle(
+            checked = sleep != null,
+            onClick = { menu = true },
+            icon = R.drawable.ic_bedtime,
+            description = stringResource(R.string.music_sleep),
+            interactionSource = interactions,
+            modifier = Modifier.testTag("sheetSleep"),
+        )
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
             val choices = SLEEP_MINUTES.size + 2
             SelectableDropdownMenuItem(
@@ -755,103 +913,6 @@ private fun SleepButton(sleep: MusicSleep?, actions: MusicActions) {
 }
 
 @Composable
-private fun MoreButton(state: MusicState, actions: MusicActions) {
-    if (state.track.saved) return
-    var menu by remember { mutableStateOf(false) }
-    Box {
-        IconButton(onClick = { menu = true }, shapes = IconButtonDefaults.shapes(), modifier = Modifier.testTag("sheetMore")) {
-            Icon(painterResource(R.drawable.ic_more_vert), stringResource(R.string.music_entry_menu))
-        }
-        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.music_go_to_message)) },
-                onClick = {
-                    menu = false
-                    actions.onGoToMessage()
-                },
-                shape = MenuDefaults.itemShape(0, 1).shape,
-                leadingIcon = { Icon(painterResource(R.drawable.ic_chat), null) },
-                modifier = Modifier.testTag("sheetGoToMessage"),
-            )
-        }
-    }
-}
-
-@Composable
-private fun ModeButton(
-    checked: Boolean,
-    onClick: () -> Unit,
-    description: String,
-    modifier: Modifier = Modifier,
-    interactionSource: MutableInteractionSource? = null,
-    content: @Composable () -> Unit,
-) {
-    val motion = MaterialTheme.motionScheme
-    val scheme = MaterialTheme.colorScheme
-    val radius by animateDpAsState(if (checked) MODE_HEIGHT / 2 else MODE_OFF_CORNER, motion.defaultSpatialSpec(), label = "modeCorner")
-    val color by animateColorAsState(if (checked) scheme.primary else scheme.surfaceContainerHighest, motion.defaultEffectsSpec(), label = "modeColor")
-    val tint by animateColorAsState(if (checked) scheme.onPrimary else scheme.onSurfaceVariant, motion.defaultEffectsSpec(), label = "modeTint")
-    Surface(
-        checked = checked,
-        onCheckedChange = { onClick() },
-        shape = RoundedCornerShape(radius),
-        color = color,
-        contentColor = tint,
-        interactionSource = interactionSource,
-        modifier = modifier.height(MODE_HEIGHT).semantics { contentDescription = description },
-    ) { Box(contentAlignment = Alignment.Center) { content() } }
-}
-
-@Composable
-internal fun modeColors() = ToggleButtonDefaults.colors(
-    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-    checkedContainerColor = MaterialTheme.colorScheme.primary,
-    checkedContentColor = MaterialTheme.colorScheme.onPrimary,
-)
-
-@Composable
-private fun OrderButton(order: MusicOrder, actions: MusicActions, modifier: Modifier = Modifier) {
-    var menu by remember { mutableStateOf(false) }
-    val interactions = remember { MutableInteractionSource() }
-    var held by remember { mutableStateOf(false) }
-    val haptics = LocalHapticFeedback.current
-    val timeout = LocalViewConfiguration.current.longPressTimeoutMillis
-    LaunchedEffect(interactions) {
-        interactions.interactions.collectLatest { interaction ->
-            if (interaction !is PressInteraction.Press) return@collectLatest
-            held = false
-            delay(timeout)
-            held = true
-            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-            menu = true
-        }
-    }
-    val chooseLabel = stringResource(R.string.music_order_choose)
-    Box(modifier) {
-        ModeButton(
-            checked = order != MusicOrder.Chat,
-            onClick = { if (held) held = false else actions.onShuffle() },
-            description = stringResource(if (order == MusicOrder.Reverse) R.string.music_order_reverse else R.string.music_shuffle),
-            interactionSource = interactions,
-            modifier = Modifier
-                .fillMaxWidth()
-                .semantics {
-                    onLongClick(chooseLabel) {
-                        menu = true
-                        true
-                    }
-                }
-                .testTag("sheetShuffle"),
-        ) { Icon(painterResource(if (order == MusicOrder.Reverse) R.drawable.ic_swap_vert else R.drawable.ic_shuffle), null) }
-        OrderMenu(menu, order, onDismiss = { menu = false }) {
-            menu = false
-            actions.onOrder(it)
-        }
-    }
-}
-
-@Composable
 internal fun OrderMenu(expanded: Boolean, order: MusicOrder, onDismiss: () -> Unit, onChoose: (MusicOrder) -> Unit) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss, modifier = Modifier.testTag("orderMenu")) {
         MusicOrder.entries.forEachIndexed { index, each ->
@@ -883,9 +944,43 @@ internal fun orderIcon(order: MusicOrder): Int = when (order) {
     MusicOrder.Shuffle -> R.drawable.ic_shuffle
 }
 
+@Composable
+private fun Lyrics(text: String, modifier: Modifier = Modifier) {
+    Box(modifier.clip(RoundedCornerShape(PAGE_CORNER)).background(MaterialTheme.colorScheme.surfaceContainer)) {
+        Text(
+            text,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier
+                .fillMaxSize()
+                .fadingEdges(LYRICS_FADE)
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp)
+                .testTag("sheetLyrics"),
+        )
+    }
+}
+
+private fun Modifier.fadingEdges(edge: Dp): Modifier =
+    graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        .drawWithContent {
+            drawContent()
+            val share = (edge.toPx() / size.height).coerceIn(0f, 0.5f)
+            drawRect(
+                Brush.verticalGradient(0f to Color.Transparent, share to Color.Black, 1f - share to Color.Black, 1f to Color.Transparent),
+                blendMode = BlendMode.DstIn,
+            )
+        }
+
 private val WAVING = WavyProgressIndicatorDefaults.indicatorAmplitude
 private val FLAT: (Float) -> Float = { 0f }
-private val THUMB = DpSize(4.dp, 32.dp)
+private val THUMB = DpSize(4.dp, 24.dp)
+private val TIME_GAP = 4.dp
+private val PAGE_MARGIN = 24.dp
+private val COVER_GAP = 16.dp
+private val CONTROLS_GAP = 16.dp
+private val BOTTOM_GAP = 24.dp
+private val BAR_TITLE_INSET = TopBarTokens.PillSize * 2 + TopBarTokens.PillGap * 2
 private val COVER_MAX = 480.dp
 private val COVER_ICON = 72.dp
 private val PAGE_CORNER = 28.dp
@@ -897,23 +992,14 @@ private const val BACK_SCALE = 0.1f
 private const val PAUSED_SHRINK = 0.1f
 private const val SWIPE_FADE = 0.4f
 private const val SWIPE_ENTRY = 0.35f
+private val SWIPE_TILT = 40.dp
+private const val LYRICS_COVER_SHRINK = 0.08f
+private val LYRICS_RISE = 24.dp
+private val LYRICS_FADE = 24.dp
+private const val SEEK_HOLD_MS = 2_000L
+private const val SEEK_REACHED_MS = 1_000L
 private const val MARQUEE_ROUNDS = 3
-private val TRANSPORT_HEIGHT = 80.dp
+private val TRANSPORT_HEIGHT = 96.dp
+private const val PLAY_WEIGHT = 128f / 96f
 private val TRANSPORT_GAP = 8.dp
-private val TRANSPORT_ICON = 32.dp
-private val PLAY_ICON = 36.dp
-private val HALF = 40.dp
-private val PLAYING_CORNER = 26.dp
-private val PRESSED_CORNER = 16.dp
-private const val SIDE_WEIGHT = 1f
-private const val PLAY_WEIGHT = 1.4f
-private const val PRESSED_WEIGHT = 1.15f
-private const val MAKE_WAY_WEIGHT = 0.8f
-private val MODE_HEIGHT = 48.dp
-private val MODE_OFF_CORNER = 8.dp
-private val MODE_ROW_PADDING = 12.dp
-private val QUEUE_WIDTH = 52.dp
-private val QUEUE_HEIGHT = 40.dp
-private val QUEUE_CORNER = 6.dp
-private val PROFILE_CORNER = 12.dp
-private val PROFILE_PRESSED_CORNER = 8.dp
+private val MODE_GAP = 12.dp

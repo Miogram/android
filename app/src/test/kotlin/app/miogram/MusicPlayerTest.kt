@@ -428,6 +428,33 @@ class MusicPlayerTest {
     }
 
     @Test
+    fun thePlayingEntryPlaysOnAndAPausedTimerStillCountsDown() {
+        val ids = fake.addMusicMessages(3)
+        login()
+        music.play(track(ids[0]))
+        waitFor { music.music.value?.queue?.size == 3 }
+        music.seekTo(30_000)
+        idle()
+        val at = music.music.value!!.index
+        music.playAt(at)
+        idle()
+        assertEquals(at, engine.currentMediaItemIndex)
+        assertEquals(30_000, music.music.value!!.positionMs)
+        music.playAt((at + 1) % 3)
+        idle()
+        assertEquals(0, music.music.value!!.positionMs)
+
+        music.toggle()
+        music.sleep(15)
+        idle()
+        assertFalse(engine.isPlaying)
+        shadowOf(Looper.getMainLooper()).idleFor(java.time.Duration.ofMinutes(1))
+        assertTrue(music.music.value!!.sleep!!.leftMs in 13 * 60_000L + 59_000..14 * 60_000L)
+        music.sleep(null)
+        music.close()
+    }
+
+    @Test
     fun aLongSongKeepsASpeedOfItsOwnAndTheFilesWordsShow(): Unit = runBlocking {
         val ids = fake.addMusicMessages(2)
         login()

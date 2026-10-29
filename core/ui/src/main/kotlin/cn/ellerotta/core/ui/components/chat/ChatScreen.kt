@@ -58,7 +58,6 @@ import androidx.compose.animation.core.Animatable
 import cn.ellerotta.core.model.ChatRemoval
 import cn.ellerotta.core.model.ForwardPreview
 import androidx.compose.material3.MaterialTheme
-import cn.ellerotta.core.ui.theme.MioShapes
 import cn.ellerotta.core.ui.theme.expandFadeIn
 import cn.ellerotta.core.ui.components.location.LiveAlertSheet
 import cn.ellerotta.core.ui.theme.shrinkFadeOut
@@ -66,7 +65,6 @@ import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.PaddingValues
@@ -679,9 +677,7 @@ fun ChatScreen(
                 )
             }
             AnimatedVisibility(player != null && playerShown, enter = panels.expandFadeIn(), exit = panels.shrinkFadeOut()) {
-                Box(Modifier.padding(start = HeaderGap, end = HeaderGap, top = HeaderGap)) {
-                    Box(Modifier.clip(MioShapes.previewBar)) { player?.invoke() }
-                }
+                Box(Modifier.padding(start = HeaderGap, end = HeaderGap, top = HeaderGap)) { player?.invoke() }
             }
             AnimatedVisibility(busy, enter = panels.expandFadeIn(), exit = panels.shrinkFadeOut()) {
                 LinearWavyProgressIndicator(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = HeaderGap))

@@ -1117,7 +1117,6 @@
     <string name="music_next">Следующая</string>
     <string name="music_previous">Предыдущая</string>
     <string name="music_shuffle">Перемешать</string>
-    <string name="music_order">Порядок</string>
     <string name="music_order_chat">По порядку чата</string>
     <string name="music_order_reverse">Сначала новые</string>
     <string name="music_repeat">Повтор</string>
@@ -1140,13 +1139,12 @@
     <string name="music_save_to_profile">Добавить в мой профиль</string>
     <string name="music_saved_to_profile">Добавлено в ваш профиль</string>
     <string name="music_collapse">Свернуть плеер</string>
+    <string name="music_open">Открыть плеер</string>
+    <string name="music_cover">Обложка: %1$s</string>
+    <string name="music_photo">Фото: %1$s</string>
+    <string name="music_seek_state">%1$s из %2$s</string>
     <string name="music_position">%1$d из %2$d</string>
     <string name="music_queue">Очередь</string>
-    <string name="music_remaining">−%1$s</string>
-    <string name="music_show_left">Показать оставшееся время</string>
-    <string name="music_show_length">Показать длительность</string>
-    <string name="music_repeat_all_short">Все</string>
-    <string name="music_repeat_one_short">Одну</string>
     <string name="music_order_chat_short">По порядку</string>
     <string name="music_order_reverse_short">Новые</string>
     <string name="music_order_choose">Выбрать порядок</string>

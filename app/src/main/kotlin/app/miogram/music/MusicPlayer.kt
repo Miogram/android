@@ -76,7 +76,9 @@ class MusicPlayer @Inject constructor(
     private var sleepAtEnd = false
     private var sleeper: Job? = null
     private var lyrics: String? = null
-    private val covers = HashMap<String, ByteArray>()
+    private val covers = object : LinkedHashMap<String, ByteArray>(COVERS, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, ByteArray>?): Boolean = size > COVERS
+    }
     private val coversAsked = HashSet<String>()
     private var controller: ListenableFuture<MediaController>? = null
 
@@ -105,18 +107,16 @@ class MusicPlayer @Inject constructor(
             if (events.contains(Player.EVENT_REPEAT_MODE_CHANGED) && !voice && queue.isNotEmpty()) {
                 settings.setMusicModes(settings.musicModes.value.copy(repeat = repeatOf(player.repeatMode)))
             }
+            if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION)) lyrics = null
+            if (events.contains(Player.EVENT_TRACKS_CHANGED)) lyrics = lyricsOf(player.currentTracks)
             publish()
-            if (events.contains(Player.EVENT_TRACKS_CHANGED)) {
-                lyrics = lyricsOf(player.currentTracks)
-                publish()
-            }
             if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION)) {
                 applySpeed()
                 loadCover()
                 loadMore()
                 listened()
             }
-            if (events.contains(Player.EVENT_IS_PLAYING_CHANGED)) tick(player.isPlaying)
+            if (events.contains(Player.EVENT_IS_PLAYING_CHANGED)) tick()
             if (events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED) && player.playbackState == Player.STATE_ENDED && sleepAtEnd) clearSleep()
             if (events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED) && player.playbackState == Player.STATE_ENDED && queue.lastOrNull()?.isVoice == true) {
                 close()
@@ -184,7 +184,7 @@ class MusicPlayer @Inject constructor(
 
     fun playAt(index: Int) {
         if (index !in queue.indices) return
-        player.seekTo(index, 0)
+        if (index != player.currentMediaItemIndex || player.playbackState == Player.STATE_ENDED) player.seekTo(index, 0)
         if (player.playbackState == Player.STATE_IDLE) player.prepare()
         player.play()
     }
@@ -298,6 +298,7 @@ class MusicPlayer @Inject constructor(
             }
         }
         publish()
+        tick()
     }
 
     fun sleepAtEnd() {
@@ -311,6 +312,7 @@ class MusicPlayer @Inject constructor(
         sleeper = null
         sleepUntil = null
         sleepAtEnd = false
+        tick()
     }
 
     fun close() {
@@ -462,13 +464,11 @@ class MusicPlayer @Inject constructor(
         val avatar = track.avatarKey.takeIf { track.isVoice }
         val cover = track.media.cover()?.key.takeUnless { track.isVoice }
         if (avatar == null && cover == null) return
-        if (!coversAsked.add(track.slot)) return
+        if (covers.containsKey(track.slot) || !coversAsked.add(track.slot)) return
         scope.launch {
             val bytes = runCatching { if (avatar != null) media.avatar(avatar) else media.sticker(cover!!) }.getOrNull()
-            if (bytes == null) {
-                coversAsked -= track.slot
-                return@launch
-            }
+            coversAsked -= track.slot
+            if (bytes == null) return@launch
             covers[track.slot] = bytes
             publish()
         }
@@ -501,9 +501,14 @@ class MusicPlayer @Inject constructor(
         )
     }
 
-    private fun tick(playing: Boolean) {
-        ticker?.cancel()
-        if (!playing) return
+    private fun tick() {
+        val due = created?.isPlaying == true || sleepUntil != null
+        if (!due) {
+            ticker?.cancel()
+            ticker = null
+            return
+        }
+        if (ticker?.isActive == true) return
         ticker = scope.launch {
             while (isActive) {
                 delay(TICK_MS)
@@ -543,6 +548,7 @@ class MusicPlayer @Inject constructor(
 
         fun avatarUri(key: String): Uri = Uri.Builder().scheme(COVER_SCHEME).authority(AVATAR).appendPath(key).build()
         private const val TICK_MS = 500L
+        private const val COVERS = 8
     }
 }
 

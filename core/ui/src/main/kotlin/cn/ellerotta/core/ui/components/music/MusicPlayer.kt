@@ -1,6 +1,5 @@
 package cn.ellerotta.core.ui.components.music
 
-import android.graphics.BitmapFactory
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,28 +12,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,6 +39,8 @@ import cn.ellerotta.core.model.MusicState
 import cn.ellerotta.core.model.MusicTrack
 import cn.ellerotta.core.ui.R
 import cn.ellerotta.core.ui.components.chat.VoiceSpeedButton
+import cn.ellerotta.core.ui.components.common.rememberDecodedPhoto
+import cn.ellerotta.core.ui.theme.MioShapes
 import cn.ellerotta.core.ui.theme.crossfade
 
 data class MusicActions(
@@ -68,9 +64,9 @@ data class MusicActions(
 )
 
 @Composable
-fun MusicCover(bytes: ByteArray?, modifier: Modifier = Modifier, voice: Boolean = false) {
-    val bitmap = remember(bytes) { bytes?.let { BitmapFactory.decodeByteArray(it, 0, it.size)?.asImageBitmap() } }
-    Box(modifier.clip(if (voice) CircleShape else MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.tertiaryContainer), contentAlignment = Alignment.Center) {
+fun MusicCover(bytes: ByteArray?, modifier: Modifier = Modifier, voice: Boolean = false, shape: Shape = MaterialTheme.shapes.medium) {
+    val bitmap = rememberDecodedPhoto(bytes)
+    Box(modifier.clip(if (voice) CircleShape else shape).background(MaterialTheme.colorScheme.tertiaryContainer), contentAlignment = Alignment.Center) {
         if (bitmap != null) {
             Image(bitmap, null, contentScale = ContentScale.Crop, modifier = Modifier.matchParentSize())
         } else {
@@ -93,25 +89,25 @@ fun MiniPlayer(state: MusicState, onOpen: () -> Unit, actions: MusicActions, mod
     DisposableEffect(anchor) { onDispose { anchor?.bounds = null } }
     val swipe = remember { SkipSwipe() }
     val scheme = MaterialTheme.colorScheme
-    Surface(color = scheme.surfaceContainer, modifier = modifier.fillMaxWidth().testTag("miniPlayer")) {
+    val openLabel = stringResource(R.string.music_open)
+    Surface(color = scheme.surfaceContainer, shape = MioShapes.previewBar, modifier = modifier.fillMaxWidth().testTag("miniPlayer")) {
         Row(
             Modifier
                 .skipSwipe(swipe, actions)
-                .clickable(onClick = onOpen)
+                .clickable(onClickLabel = openLabel, onClick = onOpen)
                 .graphicsLayer {
                     translationX = swipe.offset
                     alpha = 1f - swipe.share * MINI_SWIPE_FADE
                 }
-                .padding(start = 12.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+                .padding(start = MINI_INSET, end = 4.dp, top = MINI_INSET - (MINI_RING - MINI_COVER) / 2, bottom = MINI_INSET - (MINI_RING - MINI_COVER) / 2),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            MusicCover(state.cover, Modifier.size(40.dp).coverAnchor(anchor), voice = track.isVoice)
-            Column(Modifier.weight(1f).padding(start = 4.dp)) {
-                Text(track.heading(), style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("miniTitle"))
+            MusicCover(state.cover, Modifier.size(MINI_COVER).coverAnchor(anchor), voice = track.isVoice)
+            Column(Modifier.weight(1f).padding(start = 12.dp, end = 4.dp)) {
+                Text(track.heading(), style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("miniTitle"))
                 Text(
                     track.subheading(),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = scheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -119,20 +115,17 @@ fun MiniPlayer(state: MusicState, onOpen: () -> Unit, actions: MusicActions, mod
                 )
             }
             if (track.hasSpeed) VoiceSpeedButton(state.speed, actions.onSpeed, Modifier.testTag("miniSpeed"))
-            Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(MINI_RING), contentAlignment = Alignment.Center) {
                 val length = state.lengthMs
-                val stroke = with(LocalDensity.current) { Stroke(width = MINI_RING_STROKE.toPx(), cap = StrokeCap.Round) }
+                val position = state.positionMs
                 CircularWavyProgressIndicator(
-                    progress = { if (length > 0) (state.positionMs.toFloat() / length).coerceIn(0f, 1f) else 0f },
+                    progress = { if (length > 0) (position.toFloat() / length).coerceIn(0f, 1f) else 0f },
                     color = scheme.primary,
                     trackColor = scheme.secondaryContainer,
-                    stroke = stroke,
-                    trackStroke = stroke,
                     amplitude = if (state.playing) RING_WAVING else RING_FLAT,
-                    wavelength = MINI_RING_WAVELENGTH,
-                    modifier = Modifier.size(46.dp).testTag("miniProgress"),
+                    modifier = Modifier.size(MINI_RING).testTag("miniProgress"),
                 )
-                IconButton(onClick = actions.onToggle, modifier = Modifier.size(38.dp).testTag("miniToggle"), shapes = IconButtonDefaults.shapes()) {
+                IconButton(onClick = actions.onToggle, modifier = Modifier.size(MINI_TOGGLE).testTag("miniToggle"), shapes = IconButtonDefaults.shapes()) {
                     PlayIcon(state.playing)
                 }
             }
@@ -157,6 +150,8 @@ internal fun PlayIcon(playing: Boolean, modifier: Modifier = Modifier) {
 
 private val RING_WAVING = WavyProgressIndicatorDefaults.indicatorAmplitude
 private val RING_FLAT: (Float) -> Float = { 0f }
-private val MINI_RING_STROKE = 3.dp
-private val MINI_RING_WAVELENGTH = 12.dp
+private val MINI_INSET = 8.dp
+private val MINI_COVER = 40.dp
+private val MINI_RING = 48.dp
+private val MINI_TOGGLE = 36.dp
 private const val MINI_SWIPE_FADE = 0.6f
